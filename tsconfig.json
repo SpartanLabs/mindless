@@ -1,11 +1,20 @@
 {
-    "compilerOptions": {
-      "types": [
-        "reflect-metadata",
-        "node"
-      ],
-      "experimentalDecorators": true,
-      "emitDecoratorMetadata": true,
-      "lib": ["es6", "dom", "es2015"]
-    }
-  }
+  "compilerOptions": {
+    "target": "es5",
+    "module": "es2015",
+    "declaration": true,
+    "outDir": "./dist",
+    "strict": true,
+    "sourceMap": true,
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "noImplicitAny": false
+  },
+  "exclude": [
+    "node_modules",
+    "tests"
+  ],
+  "typeRoots" : [
+    "../node_modules/@types"
+    ]
+}
