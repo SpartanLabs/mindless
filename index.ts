@@ -1,3 +1,4 @@
+export { registerProviders } from './lib/providers';
 export { Dynamo, DynamoTable, ModelFactory } from './lib/data';
 export { Router, Routes } from './lib/routing';
 export { Context } from './lib/interfaces';
