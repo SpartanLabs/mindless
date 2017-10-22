@@ -19,7 +19,7 @@ export class Router<M extends Middleware, C extends Controller> {
     private container: Container
   ) { }
 
-  public route(routes: Routes<M, C>) {
+  public route(routes: Routes<M, C>): void {
     let requestRoute: string = this.request.getResource()
     let requestMethod: string = this.request.getRequestMethod();
     let routeGroup = routes.routes[requestRoute];
@@ -38,27 +38,27 @@ export class Router<M extends Middleware, C extends Controller> {
     this.addMiddlewareIfExists(this.subjectRoute.middleware);
   }
 
-  private addMiddlewareIfExists(middleware: GenericConstructor<M>[] | undefined) {
+  private addMiddlewareIfExists(middleware: GenericConstructor<M>[] | undefined): void {
     if (middleware !== undefined) {
-      this.middleware.concat(middleware);
+      this.middleware = this.middleware.concat(middleware);
     }
   }
 
 
-  public dispatchMiddleware() {
+  public dispatchMiddleware(): void {
     // no idea if this works, eventually want to make parrelle
     // will have an array on each middleware that will hold which middlewars it is dependent on.
     this.middleware.map(element => this.container.resolve(element))
       .forEach(m => m.handle(this.request));
   }
 
-  public async dispatchController() {
+  public async dispatchController(): Promise<Response> {
     try {
       let subjectController: C = this.container.resolve(this.subjectRoute.controller);
-      let response : Response = await subjectController[this.subjectRoute.function](this.request);
+      let response: Response = await subjectController[this.subjectRoute.function](this.request);
       return response;
     } catch (e) {
-      let body =  {
+      let body = {
         'Error Message': e.message,
         'Mindless Message': 'Unable to resolve requested controller or method make sure your routes are configured properly'
       };
