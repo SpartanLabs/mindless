@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+      "types": [
+        "reflect-metadata",
+        "node"
+      ],
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "lib": ["es6", "dom", "es2015"]
+    }
+  }
