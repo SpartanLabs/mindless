@@ -1,8 +1,22 @@
-import { Request } from '../../request';
-import { Event } from '../../request/event';
-import { getEvent } from '../object-defaults';
+import { Request } from '../../lib/request';
+import { Event, HttpMethods } from '../../lib/request/event';
 
 import * as TypeMoq from 'typemoq';
+
+function getEvent(): Event {
+    return {
+        headers: {},
+        path: '',
+        pathParameters: {},
+        requestContext: {},
+        resource: "",
+        httpMethod: HttpMethods.Get,
+        queryStringParameters: {},
+        stageVariables: {},
+        body: ""
+    };
+}
+
 
 describe('Test request constructor', () => {
     // construct an event object
