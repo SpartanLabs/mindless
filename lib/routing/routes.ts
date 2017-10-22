@@ -1,7 +1,6 @@
 import { GenericConstructor } from '../interfaces';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
-// type Routes<M extends Middleware, C extends Controller> = {
 
 export type Route<M, C> = {
   controller: GenericConstructor<C>,
