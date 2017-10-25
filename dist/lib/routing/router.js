@@ -57,7 +57,7 @@ var Router = (function () {
     };
     Router.prototype.addMiddlewareIfExists = function (middleware) {
         if (middleware !== undefined) {
-            this.middleware.concat(middleware);
+            this.middleware = this.middleware.concat(middleware);
         }
     };
     Router.prototype.dispatchMiddleware = function () {

@@ -9,7 +9,6 @@ exports.__esModule = true;
 var inversify_1 = require("inversify");
 var Controller = (function () {
     function Controller() {
-        console.log("abstract consturct");
     }
     Controller = __decorate([
         inversify_1.injectable()
