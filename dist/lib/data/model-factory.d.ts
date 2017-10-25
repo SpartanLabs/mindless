@@ -1,7 +1,7 @@
 export interface ModelFactory<T> {
     create(data: {
         [key: string]: {};
-    }): Promise<T>;
+    }, params?: {}): Promise<T>;
     getAll(): Promise<T[]>;
     getAllRaw(): Promise<any[]>;
 }
