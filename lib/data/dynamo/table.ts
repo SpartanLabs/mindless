@@ -17,7 +17,7 @@ export abstract class DynamoTable<T> {
         // this.dynamo.createTables();
     }
 
-    public create(data: { [key: string]: {} }, params?: {}): Promise<T> {
+    public create(data: { [key: string]: {} }, params = {}): Promise<T> {
 
         let promiseCallback = (resolve, reject) => {
             let createModelCallback = (err, model) => {
@@ -29,9 +29,6 @@ export abstract class DynamoTable<T> {
                     console.log("model: ", m);
                     resolve(m);
                 }
-            }
-            if (params == null) {
-                params = {};
             }
 
             this._dynamoTable.create(data, params, createModelCallback);
