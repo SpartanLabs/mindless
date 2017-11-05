@@ -11,14 +11,14 @@ export abstract class DynamoTable<T> {
 
     constructor(private dynamo: Dynamo) {
     }
-    
+
     protected registerTable() {
         this._dynamoTable = this.dynamo.addDefinition(this.tableName, this.definition);
         // this.dynamo.createTables();
     }
 
-    public create(data: {[key: string]: {}}): Promise<T> {
-        
+    public create(data: { [key: string]: {} }, params = {}): Promise<T> {
+
         let promiseCallback = (resolve, reject) => {
             let createModelCallback = (err, model) => {
                 if (err) {
@@ -30,25 +30,25 @@ export abstract class DynamoTable<T> {
                     resolve(m);
                 }
             }
-            this._dynamoTable.create(data, createModelCallback);
+
+            this._dynamoTable.create(data, params, createModelCallback);
         };
-        
 
         return new Promise(promiseCallback)
     }
 
     public getAll(): Promise<T[]> {
-        let transform = (models:dyn.Document[]) => models.map(model => this.transformToModel(model));
+        let transform = (models: dyn.Document[]) => models.map(model => this.transformToModel(model));
         return this.getAllBase(transform);
     }
 
     public getAllRaw(): Promise<{}[]> {
-       return this.getAllBase(x => x);       
+        return this.getAllBase(x => x);
     }
 
-    protected getAllBase(transform: (x:any[]) => any): Promise<any[]> {
+    protected getAllBase(transform: (x: any[]) => any): Promise<any[]> {
         let promiseCallback = (resolve, reject) => {
-            
+
             let callback = (err, models: dyn.DocumentCollection) => {
                 if (err) {
                     console.error('Error retrieving all models on ' + this.tableName + ' table. Err: ', err);
@@ -61,7 +61,7 @@ export abstract class DynamoTable<T> {
 
             this._dynamoTable.scan().loadAll().exec(callback);
         };
-        
+
         return new Promise(promiseCallback);
     }
 

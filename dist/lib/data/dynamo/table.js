@@ -14,7 +14,7 @@ var DynamoTable = (function () {
     DynamoTable.prototype.registerTable = function () {
         this._dynamoTable = this.dynamo.addDefinition(this.tableName, this.definition);
     };
-    DynamoTable.prototype.create = function (data) {
+    DynamoTable.prototype.create = function (data, params) {
         var _this = this;
         var promiseCallback = function (resolve, reject) {
             var createModelCallback = function (err, model) {
@@ -28,7 +28,10 @@ var DynamoTable = (function () {
                     resolve(m);
                 }
             };
-            _this._dynamoTable.create(data, createModelCallback);
+            if (params == null) {
+                params = {};
+            }
+            _this._dynamoTable.create(data, params, createModelCallback);
         };
         return new Promise(promiseCallback);
     };

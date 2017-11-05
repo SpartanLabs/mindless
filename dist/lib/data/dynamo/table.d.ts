@@ -9,7 +9,7 @@ export declare abstract class DynamoTable<T> {
     protected registerTable(): void;
     create(data: {
         [key: string]: {};
-    }): Promise<T>;
+    }, params?: {}): Promise<T>;
     getAll(): Promise<T[]>;
     getAllRaw(): Promise<{}[]>;
     protected getAllBase(transform: (x: any[]) => any): Promise<any[]>;
