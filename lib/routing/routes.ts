@@ -1,24 +1,25 @@
+import { extname } from 'path';
 import { GenericConstructor } from '../interfaces';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
 
-export type Route<M, C> = {
+export interface Route<M, C>  {
   controller: GenericConstructor<C>,
   function: string,
   middleware?: GenericConstructor<M>[]
 }
 
-export type MindlessRoutes = Routes<Middleware, Controller>;
-
-export type Routes<M, C> = {
+export interface Routes<M, C, R extends Route<M,C>>  {
   middleware?: GenericConstructor<M>[],
   routes: {
     [key: string]: {
       middleware?: GenericConstructor<M>[],
-      post?: Route<M, C>,
-      get?: Route<M, C>,
-      put?: Route<M, C>,
-      delete?: Route<M, C>
+      post?: R,
+      get?: R,
+      put?: R,
+      delete?: R
     }
   }
 }
+
+export type MindlessRoutes = Routes<Middleware, Controller, Route<Middleware, Controller>>;
