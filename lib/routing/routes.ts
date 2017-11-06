@@ -1,4 +1,3 @@
-import { extname } from 'path';
 import { GenericConstructor } from '../interfaces';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
