@@ -1,3 +1,4 @@
+import { Request } from '../request';
 export abstract class Middleware {
   constructor() { }
 
@@ -7,5 +8,5 @@ export abstract class Middleware {
     return this.independent;
   }
 
-  abstract handle(request);
+  abstract handle(request: Request);
 }

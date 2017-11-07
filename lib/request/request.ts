@@ -4,6 +4,7 @@ import { IRequest } from './request-interface';
 
 export class Request implements IRequest {
     protected _body: {[key : string] : any};
+    public RouteMetaData: any;
 
     constructor(protected event : Event) {
         if (event.body == "") {

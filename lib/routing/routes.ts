@@ -2,13 +2,14 @@ import { GenericConstructor } from '../interfaces';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
 
-export interface Route<M, C>  {
+
+export interface Route<M extends Middleware, C extends Controller>  {
   controller: GenericConstructor<C>,
   function: string,
   middleware?: GenericConstructor<M>[]
 }
 
-export interface Routes<M, C, R extends Route<M,C>>  {
+export interface Routes<M extends Middleware, C extends Controller, R extends Route<M,C>>  {
   middleware?: GenericConstructor<M>[],
   routes: {
     [key: string]: {
@@ -20,5 +21,6 @@ export interface Routes<M, C, R extends Route<M,C>>  {
     }
   }
 }
+
 
 export type MindlessRoutes = Routes<Middleware, Controller, Route<Middleware, Controller>>;

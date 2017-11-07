@@ -1,4 +1,4 @@
-import { Routes, Route } from './routes';
+import { Route, Routes } from './routes';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
 import { GenericConstructor } from '../interfaces';
@@ -7,19 +7,17 @@ import { Response } from '../response';
 import { Container } from 'inversify';
 
 
-
-export class Router<M extends Middleware, C extends Controller> {
+export class Router<M extends Middleware, C extends Controller, R extends Route<M,C>> {
 
   private middleware: GenericConstructor<M>[] = [];
   private subjectRoute: Route<M, C>;
-  // private subjectController : C;
 
   constructor(
     private request: Request,
     private container: Container
   ) { }
 
-  public route(routes: Routes<M, C>): void {
+  public route(routes: Routes<M, C, R>): void {
     let requestRoute: string = this.request.getResource()
     let requestMethod: string = this.request.getRequestMethod();
     let routeGroup = routes.routes[requestRoute];
@@ -35,7 +33,27 @@ export class Router<M extends Middleware, C extends Controller> {
 
     this.subjectRoute = routeGroup[requestMethod];
 
+    this.addRouteMetaDataToRequest();
+
     this.addMiddlewareIfExists(this.subjectRoute.middleware);
+  }
+
+  /**
+   * May be useful to have access to the route data
+   * for extensions (Permissions/Gates wink wink)
+   */
+  private addRouteMetaDataToRequest() {
+    
+    let narrowedRoute: R = Object.create(this.subjectRoute);
+    
+    /**
+     * controller and middleware are constructos 
+     * there should be no need for them outside of this router
+     */
+    delete narrowedRoute.controller;
+    delete narrowedRoute.middleware;
+
+    this.request.RouteMetaData = narrowedRoute;
   }
 
   private addMiddlewareIfExists(middleware: GenericConstructor<M>[] | undefined): void {
@@ -65,5 +83,4 @@ export class Router<M extends Middleware, C extends Controller> {
       return new Response(500, body);
     }
   }
-
 }
