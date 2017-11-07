@@ -17,22 +17,22 @@ export class ConfigurationManager {
 
     }
 
-    public get(name: string): any {
-        if (this.configs.hasOwnProperty(name)) {
-            return this.configs[name];
+    public get(key: string): any {
+        if (this.configs.hasOwnProperty(key)) {
+            return this.configs[key];
         }
         else {
-            throw Error(`Configuration entry with key '${name}' not found`);
+            throw Error(`Configuration entry with key '${key}' not found`);
         }
     }
 
-    public set(name: string, value: any): void {
-        this.configs[name] = value;
+    public set(key: string, value: any): void {
+        this.configs[key] = value;
     }
 
-    public setIfNonExistant(name: string, value: any): void {
-        if (this.configs.hasOwnProperty(name))
+    public setIfNonExistant(key: string, value: any): void {
+        if (this.configs.hasOwnProperty(key))
             return;
-        this.set(name, value);
+        this.set(key, value);
     }
 }
