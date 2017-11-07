@@ -1,0 +1,18 @@
+{
+    "Customer": {
+        "dbConfig": {
+            "host": "PROD_SERVER"
+        },
+        "credit": {
+            "initialDays": "CR_ID"
+        },
+        // Environment variables containing multiple configs
+        // New as of config@1.14.0
+        "settings": {
+            "adminAccounts": {
+                "__name": "ADMIN_ACCS",
+                "__format": "json"
+            }
+        }
+    }
+}

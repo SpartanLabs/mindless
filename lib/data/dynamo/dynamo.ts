@@ -1,15 +1,15 @@
+import { MINDLESS_SERVICE_INDENTIFIERS } from '../../types';
+import { ConfigurationManager } from '../../configs';
 import * as dyn from 'dynogels';
-import { injectable } from 'inversify';
-
-
+import { injectable, inject } from 'inversify';
 import { DynamoTable } from './table';
 
 @injectable()
 export class Dynamo {
 
-    constructor() {
+    constructor( @inject(MINDLESS_SERVICE_INDENTIFIERS.ConfigurationManager) private configManager: ConfigurationManager) {
         dyn.AWS.config.update({ region: "us-east-1", accessKeyId: "abcd", secretAccessKey: "secret" });
-        const opts = { endpoint: 'http://localhost:8008' }
+        const opts = { endpoint: configManager.get('dynamoEndpoint') }
         dyn.dynamoDriver(new dyn.AWS.DynamoDB(opts));
     }
 
