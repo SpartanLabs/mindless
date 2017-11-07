@@ -7,11 +7,6 @@
     "directories": {
         "lib": "lib"
     },
-    "config": {
-        "Dynamo": {
-            "endpoint": "http://localhost:8008"
-        }
-    },
     "devDependencies": {
         "@types/joi": "^10.4.3",
         "@types/node": "^8.0.31",
