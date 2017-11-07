@@ -1,4 +1,4 @@
-import { Route, Routes } from './routes';
+import { Routes, Route } from './routes';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
 import { GenericConstructor } from '../interfaces';
