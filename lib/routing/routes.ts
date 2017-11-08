@@ -22,5 +22,5 @@ export interface Routes<M extends Middleware, C extends Controller, R extends Ro
   }
 }
 
-
-export type MindlessRoutes = Routes<Middleware, Controller, Route<Middleware, Controller>>;
+export type MindlessRoute = Route<Middleware, Controller>;
+export type MindlessRoutes = Routes<Middleware, Controller, MindlessRoute>; 
