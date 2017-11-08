@@ -1,5 +1,5 @@
 import { MINDLESS_SERVICE_INDENTIFIERS } from '../../types';
-import { ConfigurationManager } from '../../configs';
+import { MindlessConfig } from '../../configs';
 import * as dyn from 'dynogels';
 import { injectable, inject } from 'inversify';
 import { DynamoTable } from './table';
@@ -7,9 +7,10 @@ import { DynamoTable } from './table';
 @injectable()
 export class Dynamo {
 
-    constructor( @inject(MINDLESS_SERVICE_INDENTIFIERS.ConfigurationManager) private configManager: ConfigurationManager) {
+    constructor( @inject(MINDLESS_SERVICE_INDENTIFIERS.MindlessConfig) private config: MindlessConfig) {
         dyn.AWS.config.update({ region: "us-east-1", accessKeyId: "abcd", secretAccessKey: "secret" });
-        const opts = { endpoint: configManager.get('dynamoEndpoint') }
+        const opts = { endpoint: config.dynamoEndpoint }
+        console.log(config);
         dyn.dynamoDriver(new dyn.AWS.DynamoDB(opts));
     }
 

@@ -28,17 +28,7 @@ describe('registerProviders', () => {
         container.bind<MindlessConfig>(MINDLESS_SERVICE_INDENTIFIERS.MindlessConfig).to(CustomConfig);
 
         registerProviders(container);
-
+        
         expect(container.get<MindlessConfig>(MINDLESS_SERVICE_INDENTIFIERS.MindlessConfig).dynamoEndpoint).toEqual("MyCustomEndpoint");
-    });
-
-    test(' registers ConfigurationManager', () => {
-        let container = new Container();
-
-        container.bind<MindlessConfig>(MINDLESS_SERVICE_INDENTIFIERS.MindlessConfig).to(CustomConfig);
-
-        registerProviders(container);
-
-        expect(container.get<ConfigurationManager>(MINDLESS_SERVICE_INDENTIFIERS.ConfigurationManager).get("dynamoEndpoint")).toEqual("MyCustomEndpoint");
     });
 });
