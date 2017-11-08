@@ -47,7 +47,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
     let narrowedRoute: R = Object.create(this.subjectRoute);
     
     /**
-     * controller and middleware are constructos 
+     * controller and middleware are constructors 
      * there should be no need for them outside of this router
      */
     delete narrowedRoute.controller;
