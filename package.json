@@ -8,12 +8,7 @@
         "lib": "lib"
     },
     "devDependencies": {
-        "@types/joi": "^10.4.3",
-        "@types/node": "^8.0.31",
-        "jest": "^21.2.1",
-        "ts-jest": "^21.1.3",
-        "typemoq": "^2.0.1",
-        "typescript": "^2.5.3"
+        
     },
     "dependencies": {
         "dynogels": "^8.0.1",
@@ -22,7 +17,8 @@
     },
     "scripts": {
         "build": "tsc",
-        "test": "jest"
+        "test": "jest",
+        "test-cover": "jest --coverage"
     },
     "repository": {
         "type": "git",

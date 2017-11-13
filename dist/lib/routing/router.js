@@ -53,7 +53,14 @@ var Router = (function () {
                 + ", does not exists on route, " + requestRoute + "'.");
         }
         this.subjectRoute = routeGroup[requestMethod];
+        this.addRouteMetaDataToRequest();
         this.addMiddlewareIfExists(this.subjectRoute.middleware);
+    };
+    Router.prototype.addRouteMetaDataToRequest = function () {
+        var narrowedRoute = Object.create(this.subjectRoute);
+        delete narrowedRoute.controller;
+        delete narrowedRoute.middleware;
+        this.request.RouteMetaData = narrowedRoute;
     };
     Router.prototype.addMiddlewareIfExists = function (middleware) {
         if (middleware !== undefined) {

@@ -16,6 +16,7 @@ var DynamoTable = (function () {
     };
     DynamoTable.prototype.create = function (data, params) {
         var _this = this;
+        if (params === void 0) { params = {}; }
         var promiseCallback = function (resolve, reject) {
             var createModelCallback = function (err, model) {
                 if (err) {
@@ -28,9 +29,6 @@ var DynamoTable = (function () {
                     resolve(m);
                 }
             };
-            if (params == null) {
-                params = {};
-            }
             _this._dynamoTable.create(data, params, createModelCallback);
         };
         return new Promise(promiseCallback);

@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Middleware } from '../../lib/middleware/middleware';
 
 describe('Test middleware isIndependent method', () => {

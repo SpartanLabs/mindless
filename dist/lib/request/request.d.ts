@@ -5,6 +5,7 @@ export declare class Request implements IRequest {
     protected _body: {
         [key: string]: any;
     };
+    RouteMetaData: any;
     constructor(event: Event);
     getResource(): string;
     getRequestMethod(): string;

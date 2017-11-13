@@ -1,2 +1,2 @@
-export { Routes, MindlessRoutes, Route } from './routes';
+export { Routes, MindlessRoutes, MindlessRoute, Route } from './routes';
 export { Router } from './router';
