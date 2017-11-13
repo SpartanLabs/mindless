@@ -1,3 +1,5 @@
+/// <reference path="../../../typings/dynogels-types/index.d.ts" />
+
 import * as dyn from 'dynogels';
 import { injectable } from 'inversify';
 
@@ -6,32 +8,30 @@ import { Dynamo } from './dynamo';
 @injectable()
 export abstract class DynamoTable<T> {
     protected abstract tableName: string;
-    protected abstract definition: dyn.DynamoTableDefinition;
-    private _dynamoTable;
+    protected abstract definition: dyn.ModelConfiguration;
+    private _model: dyn.Model;
 
     constructor(private dynamo: Dynamo) {
     }
 
     protected registerTable() {
-        this._dynamoTable = this.dynamo.addDefinition(this.tableName, this.definition);
+        this._model = this.dynamo.addDefinition(this.tableName, this.definition);
         // this.dynamo.createTables();
     }
 
-    public create(data: { [key: string]: {} }, params = {}): Promise<T> {
-
+    public create(data: { [key: string]: {} }, options: dyn.CreateItemOptions = {}): Promise<T> {
         let promiseCallback = (resolve, reject) => {
-            let createModelCallback = (err, model) => {
+            let createModelCallback: dyn.DynogelsItemCallback = (err, model) => {
                 if (err) {
                     console.error('Error creating a entry on ' + this.tableName + ' table. Err: ', err);
                     reject(err);
                 } else {
                     let m: T = this.transformToModel(model);
-                    console.log("model: ", m);
                     resolve(m);
                 }
             }
 
-            this._dynamoTable.create(data, params, createModelCallback);
+            this._model.create(data, options, createModelCallback);
         };
 
         return new Promise(promiseCallback)
@@ -59,9 +59,48 @@ export abstract class DynamoTable<T> {
                 }
             };
 
-            this._dynamoTable.scan().loadAll().exec(callback);
+            this._model.scan().loadAll().exec(callback);
         };
 
+        return new Promise(promiseCallback);
+    }
+
+    protected update(data: { [key: string]: {} }, options: dyn.UpdateItemOptions = {}): Promise<T> {
+        let promiseCallback = (resolve, reject) => {
+
+            let callback: dyn.DynogelsItemCallback = (err, item) => {
+                if (err) {
+                    console.error('Error updating item on ' + this.tableName + ' table. Err: ', err);
+                    reject(err);
+                } else {
+                    resolve(this.transformToModel(item));
+                }
+            };
+
+            this._model.update(data, options, callback);
+        }
+        return new Promise(promiseCallback);
+    }
+
+    protected delete(hashKey: string, rangeKey?: string, options: dyn.DestroyItemOptions = {}): Promise<T> {
+        let promiseCallback = (resolve, reject) => {
+
+            let callback: dyn.DynogelsItemCallback = (err, item) => {
+                if (err) {
+                    console.error('Error updating item on ' + this.tableName + ' table. Err: ', err);
+                    reject(err);
+                } else {
+                    resolve(this.transformToModel(item));
+                }
+            };
+
+            if (rangeKey == null) {
+                this._model.destroy(hashKey, options, callback);
+            }
+            else {
+                this._model.destroy(hashKey, rangeKey, options, callback);
+            }
+        }
         return new Promise(promiseCallback);
     }
 

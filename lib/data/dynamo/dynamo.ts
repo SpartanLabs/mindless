@@ -1,4 +1,4 @@
-import * as dyn from 'dynogels';
+import * as dyn from "dynogels";
 import { injectable } from 'inversify';
 
 
@@ -13,7 +13,7 @@ export class Dynamo {
         dyn.dynamoDriver(new dyn.AWS.DynamoDB(opts));
     }
 
-    public addDefinition(tableName: string, tableDefnition: dyn.DynamoTableDefinition) {
+    public addDefinition(tableName: string, tableDefnition: dyn.ModelConfiguration) {
         return dyn.define(tableName, tableDefnition);
     }
 
