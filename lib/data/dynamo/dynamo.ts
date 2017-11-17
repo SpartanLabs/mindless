@@ -2,6 +2,7 @@ import { MINDLESS_SERVICE_INDENTIFIERS } from '../../types';
 import { MindlessConfig } from '../../configs';
 import * as dyn from 'dynogels';
 import { injectable, inject } from 'inversify';
+
 import { DynamoTable } from './table';
 
 @injectable()
@@ -14,7 +15,7 @@ export class Dynamo {
         dyn.dynamoDriver(new dyn.AWS.DynamoDB(opts));
     }
 
-    public addDefinition(tableName: string, tableDefnition: dyn.DynamoTableDefinition) {
+    public addDefinition(tableName: string, tableDefnition: dyn.ModelConfiguration) {
         return dyn.define(tableName, tableDefnition);
     }
 
