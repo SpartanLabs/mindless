@@ -1,6 +1,8 @@
 .DS_Store
 .vscode
 node_modules
+**/*/coverage
+dist/tests
 yarn-error.log
 package-lock.json
 coverage

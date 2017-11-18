@@ -3,5 +3,5 @@ export declare abstract class Middleware {
     constructor();
     protected independent: boolean;
     isIndependent(): boolean;
-    abstract handle(request: Request): any;
+    abstract handle(request: Request): Promise<any>;
 }
