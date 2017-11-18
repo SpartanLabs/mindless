@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import { Routes, Route } from './routes';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
@@ -7,7 +8,7 @@ import { Response } from '../response';
 import { Container } from 'inversify';
 
 
-export class Router<M extends Middleware, C extends Controller, R extends Route<M,C>> {
+export class Router<M extends Middleware, C extends Controller, R extends Route<M, C>> {
 
   private middleware: GenericConstructor<M>[] = [];
   private subjectRoute: Route<M, C>;
@@ -43,9 +44,9 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
    * for extensions (Permissions/Gates wink wink)
    */
   private addRouteMetaDataToRequest() {
-    
+
     let narrowedRoute: R = Object.create(this.subjectRoute);
-    
+
     /**
      * controller and middleware are constructors 
      * there should be no need for them outside of this router
@@ -63,11 +64,11 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
   }
 
 
-  public dispatchMiddleware(): void {
-    // no idea if this works, eventually want to make parrelle
-    // will have an array on each middleware that will hold which middlewars it is dependent on.
-    this.middleware.map(element => this.container.resolve(element))
-      .forEach(m => m.handle(this.request));
+  public dispatchMiddleware(): Promise<any> {
+    const promises: Promise<any>[] = this.middleware.map(constructor => this.container.resolve(constructor))
+      .map(object => object.handle(this.request));
+    
+      return Promise.all(promises);
   }
 
   public async dispatchController(): Promise<Response> {

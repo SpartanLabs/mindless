@@ -12,8 +12,7 @@
     "lib": ["es2015"]
   },
   "exclude": [
-    "node_modules",
-    "tests"
+    "node_modules"
   ],
   "typeRoots" : [
     "../node_modules/@types"

@@ -13,6 +13,6 @@ export declare class Router<M extends Middleware, C extends Controller, R extend
     route(routes: Routes<M, C, R>): void;
     private addRouteMetaDataToRequest();
     private addMiddlewareIfExists(middleware);
-    dispatchMiddleware(): void;
+    dispatchMiddleware(): Promise<any>;
     dispatchController(): Promise<Response>;
 }

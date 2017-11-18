@@ -69,8 +69,9 @@ var Router = (function () {
     };
     Router.prototype.dispatchMiddleware = function () {
         var _this = this;
-        this.middleware.map(function (element) { return _this.container.resolve(element); })
-            .forEach(function (m) { return m.handle(_this.request); });
+        var promises = this.middleware.map(function (constructor) { return _this.container.resolve(constructor); })
+            .map(function (object) { return object.handle(_this.request); });
+        return Promise.all(promises);
     };
     Router.prototype.dispatchController = function () {
         return __awaiter(this, void 0, void 0, function () {

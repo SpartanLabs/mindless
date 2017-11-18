@@ -11,5 +11,5 @@ export abstract class Middleware {
     return this.independent;
   }
 
-  abstract handle(request: Request);
+  abstract handle(request: Request): Promise<any>;
 }
