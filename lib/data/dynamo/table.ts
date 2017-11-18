@@ -1,7 +1,8 @@
 import { DynogelsItemCallback, CreateItemOptions, Model, ModelConfiguration, Document, DocumentCollection, UpdateItemOptions, DestroyItemOptions } from 'dynogels';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 
 import { Dynamo } from './dynamo';
+import { MINDLESS_SERVICE_INDENTIFIERS } from '../../types';
 
 @injectable()
 export abstract class DynamoTable<T> {
@@ -9,7 +10,7 @@ export abstract class DynamoTable<T> {
     protected abstract definition: ModelConfiguration;
     private _model: Model;
 
-    constructor(private dynamo: Dynamo) {
+    constructor( @inject(MINDLESS_SERVICE_INDENTIFIERS.Dynamo) private dynamo: Dynamo) {
     }
 
     protected registerTable() {
