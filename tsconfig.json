@@ -17,8 +17,5 @@
     ],
     "typeRoots": [
         "../node_modules/@types"
-    ],
-    "files": [
-        "typings/index.d.ts"
     ]
 }
