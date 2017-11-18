@@ -15,6 +15,7 @@
         "typescript": "^2.5.3"
     },
     "dependencies": {
+        "@types/dynogels": "^8.0.0",
         "dynogels": "^8.0.1",
         "inversify": "^4.3.0",
         "reflect-metadata": "^0.1.10"
