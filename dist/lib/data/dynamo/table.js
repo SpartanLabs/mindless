@@ -12,11 +12,11 @@ var DynamoTable = (function () {
         this.dynamo = dynamo;
     }
     DynamoTable.prototype.registerTable = function () {
-        this._dynamoTable = this.dynamo.addDefinition(this.tableName, this.definition);
+        this._model = this.dynamo.addDefinition(this.tableName, this.definition);
     };
-    DynamoTable.prototype.create = function (data, params) {
+    DynamoTable.prototype.create = function (data, options) {
         var _this = this;
-        if (params === void 0) { params = {}; }
+        if (options === void 0) { options = {}; }
         var promiseCallback = function (resolve, reject) {
             var createModelCallback = function (err, model) {
                 if (err) {
@@ -25,11 +25,10 @@ var DynamoTable = (function () {
                 }
                 else {
                     var m = _this.transformToModel(model);
-                    console.log("model: ", m);
                     resolve(m);
                 }
             };
-            _this._dynamoTable.create(data, params, createModelCallback);
+            _this._model.create(data, options, createModelCallback);
         };
         return new Promise(promiseCallback);
     };
@@ -54,7 +53,46 @@ var DynamoTable = (function () {
                     resolve(models);
                 }
             };
-            _this._dynamoTable.scan().loadAll().exec(callback);
+            _this._model.scan().loadAll().exec(callback);
+        };
+        return new Promise(promiseCallback);
+    };
+    DynamoTable.prototype.update = function (data, options) {
+        var _this = this;
+        if (options === void 0) { options = {}; }
+        var promiseCallback = function (resolve, reject) {
+            var callback = function (err, item) {
+                if (err) {
+                    console.error('Error updating item on ' + _this.tableName + ' table. Err: ', err);
+                    reject(err);
+                }
+                else {
+                    resolve(_this.transformToModel(item));
+                }
+            };
+            _this._model.update(data, options, callback);
+        };
+        return new Promise(promiseCallback);
+    };
+    DynamoTable.prototype["delete"] = function (hashKey, rangeKey, options) {
+        var _this = this;
+        if (options === void 0) { options = {}; }
+        var promiseCallback = function (resolve, reject) {
+            var callback = function (err, item) {
+                if (err) {
+                    console.error('Error updating item on ' + _this.tableName + ' table. Err: ', err);
+                    reject(err);
+                }
+                else {
+                    resolve(_this.transformToModel(item));
+                }
+            };
+            if (rangeKey == null) {
+                _this._model.destroy(hashKey, options, callback);
+            }
+            else {
+                _this._model.destroy(hashKey, rangeKey, options, callback);
+            }
         };
         return new Promise(promiseCallback);
     };
