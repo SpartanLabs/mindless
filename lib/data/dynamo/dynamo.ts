@@ -1,19 +1,21 @@
+import { MINDLESS_SERVICE_INDENTIFIERS } from '../../types';
+import { MindlessConfig } from '../../configs';
 import * as dyn from 'dynogels';
-import { injectable } from 'inversify';
-
+import { injectable, inject } from 'inversify';
 
 import { DynamoTable } from './table';
 
 @injectable()
 export class Dynamo {
 
-    constructor() {
+    constructor( @inject(MINDLESS_SERVICE_INDENTIFIERS.MindlessConfig) private config: MindlessConfig) {
         dyn.AWS.config.update({ region: "us-east-1", accessKeyId: "abcd", secretAccessKey: "secret" });
-        const opts = { endpoint: 'http://localhost:8008' }
+        const opts = { endpoint: config.dynamoEndpoint }
+        console.log(config);
         dyn.dynamoDriver(new dyn.AWS.DynamoDB(opts));
     }
 
-    public addDefinition(tableName: string, tableDefnition: dyn.DynamoTableDefinition) {
+    public addDefinition(tableName: string, tableDefnition: dyn.ModelConfiguration) {
         return dyn.define(tableName, tableDefnition);
     }
 

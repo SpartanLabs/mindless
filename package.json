@@ -16,47 +16,48 @@
     "ts-jest": "^21.2.3",
     "typemoq": "^2.0.1",
     "typescript": "^2.5.3"
-  },
-  "dependencies": {
-    "dynogels": "^8.0.1",
-    "inversify": "^4.3.0",
-    "reflect-metadata": "^0.1.10"
-  },
-  "scripts": {
-    "build": "rm -rf dist && tsc",
-    "test": "jest",
-    "test-cover": "jest --coverage"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SpartanLabs/mindless.git"
-  },
-  "keywords": [
-    "typescript",
-    "node",
-    "framework"
-  ],
-  "author": "SpartanLabs, LLC",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/SpartanLabs/mindless/issues"
-  },
-  "homepage": "https://github.com/SpartanLabs/mindless#readme",
-  "jest": {
-    "globals": {
-      "tsConfigFile": "tsconfig.json"
     },
-    "moduleFileExtensions": [
-      "ts",
-      "js"
-    ],
-    "transform": {
-      "^.+\\.(ts)$": "./node_modules/ts-jest/preprocessor.js"
+    "dependencies": {
+        "@types/dynogels": "^8.0.0",
+        "dynogels": "^8.0.1",
+        "inversify": "^4.3.0",
+        "reflect-metadata": "^0.1.10"
     },
-    "testMatch": [
-      "**/tests/**/*.test.(ts|js)"
+    "scripts": {
+        "build": "tsc",
+        "test": "jest",
+        "test-cover": "jest --coverage"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/SpartanLabs/mindless.git"
+    },
+    "keywords": [
+        "typescript",
+        "node",
+        "framework"
     ],
-    "testEnvironment": "node",
-    "mapCoverage": true
-  }
+    "author": "SpartanLabs, LLC",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/SpartanLabs/mindless/issues"
+    },
+    "homepage": "https://github.com/SpartanLabs/mindless#readme",
+    "jest": {
+        "globals": {
+            "tsConfigFile": "tsconfig.json"
+        },
+        "moduleFileExtensions": [
+            "ts",
+            "js"
+        ],
+        "transform": {
+            "^.+\\.(ts)$": "./node_modules/ts-jest/preprocessor.js"
+        },
+        "testMatch": [
+            "**/tests/**/*.test.(ts|js)"
+        ],
+        "testEnvironment": "node",
+        "mapCoverage": true
+    }
 }

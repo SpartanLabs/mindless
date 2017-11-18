@@ -1,4 +1,4 @@
-import * as dyn from 'dynogels';
+import { DynogelsItemCallback, CreateItemOptions, Model, ModelConfiguration, Document, DocumentCollection, UpdateItemOptions, DestroyItemOptions } from 'dynogels';
 import { injectable } from 'inversify';
 
 import { Dynamo } from './dynamo';
@@ -6,39 +6,37 @@ import { Dynamo } from './dynamo';
 @injectable()
 export abstract class DynamoTable<T> {
     protected abstract tableName: string;
-    protected abstract definition: dyn.DynamoTableDefinition;
-    private _dynamoTable;
+    protected abstract definition: ModelConfiguration;
+    private _model: Model;
 
     constructor(private dynamo: Dynamo) {
     }
 
     protected registerTable() {
-        this._dynamoTable = this.dynamo.addDefinition(this.tableName, this.definition);
+        this._model = this.dynamo.addDefinition(this.tableName, this.definition);
         // this.dynamo.createTables();
     }
 
-    public create(data: { [key: string]: {} }, params = {}): Promise<T> {
-
+    public create(data: { [key: string]: {} }, options: CreateItemOptions = {}): Promise<T> {
         let promiseCallback = (resolve, reject) => {
-            let createModelCallback = (err, model) => {
+            let createModelCallback: DynogelsItemCallback = (err, model) => {
                 if (err) {
                     console.error('Error creating a entry on ' + this.tableName + ' table. Err: ', err);
                     reject(err);
                 } else {
                     let m: T = this.transformToModel(model);
-                    console.log("model: ", m);
                     resolve(m);
                 }
             }
 
-            this._dynamoTable.create(data, params, createModelCallback);
+            this._model.create(data, options, createModelCallback);
         };
 
         return new Promise(promiseCallback)
     }
 
     public getAll(): Promise<T[]> {
-        let transform = (models: dyn.Document[]) => models.map(model => this.transformToModel(model));
+        let transform = (models: Document[]) => models.map(model => this.transformToModel(model));
         return this.getAllBase(transform);
     }
 
@@ -49,7 +47,7 @@ export abstract class DynamoTable<T> {
     protected getAllBase(transform: (x: any[]) => any): Promise<any[]> {
         let promiseCallback = (resolve, reject) => {
 
-            let callback = (err, models: dyn.DocumentCollection) => {
+            let callback = (err, models: DocumentCollection) => {
                 if (err) {
                     console.error('Error retrieving all models on ' + this.tableName + ' table. Err: ', err);
                     reject(err);
@@ -59,9 +57,48 @@ export abstract class DynamoTable<T> {
                 }
             };
 
-            this._dynamoTable.scan().loadAll().exec(callback);
+            this._model.scan().loadAll().exec(callback);
         };
 
+        return new Promise(promiseCallback);
+    }
+
+    protected update(data: { [key: string]: {} }, options: UpdateItemOptions = {}): Promise<T> {
+        let promiseCallback = (resolve, reject) => {
+
+            let callback: DynogelsItemCallback = (err, item) => {
+                if (err) {
+                    console.error('Error updating item on ' + this.tableName + ' table. Err: ', err);
+                    reject(err);
+                } else {
+                    resolve(this.transformToModel(item));
+                }
+            };
+
+            this._model.update(data, options, callback);
+        }
+        return new Promise(promiseCallback);
+    }
+
+    protected delete(hashKey: string, rangeKey?: string, options: DestroyItemOptions = {}): Promise<T> {
+        let promiseCallback = (resolve, reject) => {
+
+            let callback: DynogelsItemCallback = (err, item) => {
+                if (err) {
+                    console.error('Error updating item on ' + this.tableName + ' table. Err: ', err);
+                    reject(err);
+                } else {
+                    resolve(this.transformToModel(item));
+                }
+            };
+
+            if (rangeKey == null) {
+                this._model.destroy(hashKey, options, callback);
+            }
+            else {
+                this._model.destroy(hashKey, rangeKey, options, callback);
+            }
+        }
         return new Promise(promiseCallback);
     }
 
