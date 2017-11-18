@@ -1,6 +1,4 @@
-/// <reference path="../../../typings/dynogels-types/index.d.ts" />
-
-import * as dyn from 'dynogels';
+import { DynogelsItemCallback, CreateItemOptions, Model, ModelConfiguration, Document, DocumentCollection, UpdateItemOptions, DestroyItemOptions } from 'dynogels';
 import { injectable } from 'inversify';
 
 import { Dynamo } from './dynamo';
@@ -8,8 +6,8 @@ import { Dynamo } from './dynamo';
 @injectable()
 export abstract class DynamoTable<T> {
     protected abstract tableName: string;
-    protected abstract definition: dyn.ModelConfiguration;
-    private _model: dyn.Model;
+    protected abstract definition: ModelConfiguration;
+    private _model: Model;
 
     constructor(private dynamo: Dynamo) {
     }
@@ -19,9 +17,9 @@ export abstract class DynamoTable<T> {
         // this.dynamo.createTables();
     }
 
-    public create(data: { [key: string]: {} }, options: dyn.CreateItemOptions = {}): Promise<T> {
+    public create(data: { [key: string]: {} }, options: CreateItemOptions = {}): Promise<T> {
         let promiseCallback = (resolve, reject) => {
-            let createModelCallback: dyn.DynogelsItemCallback = (err, model) => {
+            let createModelCallback: DynogelsItemCallback = (err, model) => {
                 if (err) {
                     console.error('Error creating a entry on ' + this.tableName + ' table. Err: ', err);
                     reject(err);
@@ -38,7 +36,7 @@ export abstract class DynamoTable<T> {
     }
 
     public getAll(): Promise<T[]> {
-        let transform = (models: dyn.Document[]) => models.map(model => this.transformToModel(model));
+        let transform = (models: Document[]) => models.map(model => this.transformToModel(model));
         return this.getAllBase(transform);
     }
 
@@ -49,7 +47,7 @@ export abstract class DynamoTable<T> {
     protected getAllBase(transform: (x: any[]) => any): Promise<any[]> {
         let promiseCallback = (resolve, reject) => {
 
-            let callback = (err, models: dyn.DocumentCollection) => {
+            let callback = (err, models: DocumentCollection) => {
                 if (err) {
                     console.error('Error retrieving all models on ' + this.tableName + ' table. Err: ', err);
                     reject(err);
@@ -65,10 +63,10 @@ export abstract class DynamoTable<T> {
         return new Promise(promiseCallback);
     }
 
-    protected update(data: { [key: string]: {} }, options: dyn.UpdateItemOptions = {}): Promise<T> {
+    protected update(data: { [key: string]: {} }, options: UpdateItemOptions = {}): Promise<T> {
         let promiseCallback = (resolve, reject) => {
 
-            let callback: dyn.DynogelsItemCallback = (err, item) => {
+            let callback: DynogelsItemCallback = (err, item) => {
                 if (err) {
                     console.error('Error updating item on ' + this.tableName + ' table. Err: ', err);
                     reject(err);
@@ -82,10 +80,10 @@ export abstract class DynamoTable<T> {
         return new Promise(promiseCallback);
     }
 
-    protected delete(hashKey: string, rangeKey?: string, options: dyn.DestroyItemOptions = {}): Promise<T> {
+    protected delete(hashKey: string, rangeKey?: string, options: DestroyItemOptions = {}): Promise<T> {
         let promiseCallback = (resolve, reject) => {
 
-            let callback: dyn.DynogelsItemCallback = (err, item) => {
+            let callback: DynogelsItemCallback = (err, item) => {
                 if (err) {
                     console.error('Error updating item on ' + this.tableName + ' table. Err: ', err);
                     reject(err);
