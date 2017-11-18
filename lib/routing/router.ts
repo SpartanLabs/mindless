@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events';
 import { Routes, Route } from './routes';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';

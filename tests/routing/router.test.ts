@@ -85,31 +85,31 @@ describe('Test router dispatchMiddleware method', () => {
     class TestMiddleware extends Middleware {
         public handle(request) {
             console.log('really????');
-            return Promise.reject(new Response(200, { 'msg': 'rejected' }));
+            Promise.reject(new Response(200, { 'msg': 'rejected' }));
         }
     }
 
-    
-    test('returns response from controller', () => {
-        let requestMock = TypeMoq.Mock.ofType<Request>();
-        let containerMock = TypeMoq.Mock.ofType<Container>();
-        let middlewareMock = TypeMoq.Mock.ofType<TestMiddleware>();
-    
-        let routes: MindlessRoutes = {
-            routes: {
-                "/test": {
-                    middleware: [],
-                    post: { controller: TestController, function: "test", middleware: [TestMiddleware] }
-                }
+    let requestMock = TypeMoq.Mock.ofType<Request>();
+    let containerMock = TypeMoq.Mock.ofType<Container>();
+    let middlewareMock = TypeMoq.Mock.ofType<TestMiddleware>();
+
+    let routes: MindlessRoutes = {
+        routes: {
+            "/test": {
+                middleware: [],
+                post: { controller: TestController, function: "test", middleware: [TestMiddleware] }
             }
-        };
-    
-        requestMock.setup(c => c.getResource()).returns(() => '/test');
-        requestMock.setup(c => c.getRequestMethod()).returns(() => 'post');
-        containerMock.setup(c => c.resolve(TestMiddleware)).returns(() => middlewareMock.object);
-    
+        }
+    };
+
+    requestMock.setup(c => c.getResource()).returns(() => '/test');
+    requestMock.setup(c => c.getRequestMethod()).returns(() => 'post');
+    containerMock.setup(c => c.resolve(TestMiddleware)).returns(() => middlewareMock.object);
+
+    test('returns response from controller', () => {
         let router = new Router<Middleware, Controller, Route<Middleware, Controller>>(requestMock.object, containerMock.object);
         router.route(routes);
+
 
         let isRejected = false;
         expect(router.dispatchMiddleware()).rejects.toEqual(
