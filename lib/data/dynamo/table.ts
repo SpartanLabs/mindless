@@ -63,7 +63,7 @@ export abstract class DynamoTable<T> {
         return new Promise(promiseCallback);
     }
 
-    protected update(data: { [key: string]: {} }, options: UpdateItemOptions = {}): Promise<T> {
+    public update(data: { [key: string]: {} }, options: UpdateItemOptions = {}): Promise<T> {
         let promiseCallback = (resolve, reject) => {
 
             let callback: DynogelsItemCallback = (err, item) => {
@@ -80,7 +80,7 @@ export abstract class DynamoTable<T> {
         return new Promise(promiseCallback);
     }
 
-    protected delete(hashKey: string, rangeKey?: string, options: DestroyItemOptions = {}): Promise<T> {
+    public delete(hashKey: string, rangeKey?: string, options: DestroyItemOptions = {}): Promise<T> {
         let promiseCallback = (resolve, reject) => {
 
             let callback: DynogelsItemCallback = (err, item) => {
