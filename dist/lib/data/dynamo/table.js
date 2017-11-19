@@ -88,7 +88,7 @@ var DynamoTable = (function () {
                     reject(err);
                 }
                 else {
-                    resolve(_this.transformToModel(item));
+                    resolve(true);
                 }
             };
             if (rangeKey == null) {
