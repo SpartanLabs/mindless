@@ -89,7 +89,7 @@ export abstract class DynamoTable<T> {
                     console.error('Error updating item on ' + this.tableName + ' table. Err: ', err);
                     reject(err);
                 } else {
-                    resolve(this.transformToModel(item));
+                    resolve(true);
                 }
             };
 
