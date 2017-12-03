@@ -3,7 +3,7 @@ exports.__esModule = true;
 var Request = (function () {
     function Request(event) {
         this.event = event;
-        if (event.body == "") {
+        if (event.body == "" || event.body == null) {
             this._body = {};
         }
         else {

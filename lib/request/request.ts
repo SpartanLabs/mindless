@@ -3,11 +3,11 @@ import { IRequest } from './request-interface';
 
 
 export class Request implements IRequest {
-    protected _body: {[key : string] : any};
+    protected _body: { [key: string]: any };
     public RouteMetaData: any;
 
-    constructor(protected event : Event) {
-        if (event.body == "") {
+    constructor(protected event: Event) {
+        if (event.body == "" || event.body == null) {
             this._body = {};
         } else {
             this._body = JSON.parse(event.body);
@@ -23,7 +23,7 @@ export class Request implements IRequest {
         }
     }
 
-    getResource() : string {
+    getResource(): string {
         return this.event.resource;
     }
 
@@ -31,22 +31,22 @@ export class Request implements IRequest {
         return this.event.httpMethod.toLowerCase();
     }
 
-    get(key : string) : any {
-      
-        if ( this.event.pathParameters.hasOwnProperty(key)) {
+    get(key: string): any {
+
+        if (this.event.pathParameters.hasOwnProperty(key)) {
             return this.event.pathParameters[key];
-        } 
+        }
         if (this.event.queryStringParameters.hasOwnProperty(key)) {
             return this.event.queryStringParameters[key];
         }
         if (this._body.hasOwnProperty(key)) {
             return this._body[key];
         }
-        
+
         throw Error("Invalid key: '" + key + "' , key not found in pathParameters, queryStringParameters, or Body parameters.");
     }
 
-    header(key : string) : string {
+    header(key: string): string {
         if (this.event.headers.hasOwnProperty(key)) {
             return this.event.headers[key];
         }
@@ -54,7 +54,7 @@ export class Request implements IRequest {
         throw Error("Invalid key: '" + key + "' , key not found in headers");
     }
 
-    add(key : string, val : any, overwrite : boolean = false) : void {
+    add(key: string, val: any, overwrite: boolean = false): void {
         if (overwrite || !this._body.hasOwnProperty(key)) {
             this._body[key] = val;
             return;
