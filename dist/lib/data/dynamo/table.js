@@ -44,6 +44,24 @@ var DynamoTable = (function () {
     DynamoTable.prototype.getAllRaw = function () {
         return this.getAllBase(function (x) { return x; });
     };
+    DynamoTable.prototype.getItems = function (items) {
+        var _this = this;
+        var transform = function (models) { return models.map(function (model) { return _this.transformToModel(model); }); };
+        var promiseCallback = function (resolve, reject) {
+            var callback = function (err, items) {
+                if (err) {
+                    console.error("Error getting items on " + _this.tableName + " table. Err: " + err);
+                    reject(err);
+                }
+                else {
+                    items = transform(items);
+                    resolve(items);
+                }
+            };
+            _this._model.getItems(items, callback);
+        };
+        return new Promise(promiseCallback);
+    };
     DynamoTable.prototype.getAllBase = function (transform) {
         var _this = this;
         var promiseCallback = function (resolve, reject) {
