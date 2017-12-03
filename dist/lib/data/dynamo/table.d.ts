@@ -12,6 +12,7 @@ export declare abstract class DynamoTable<T> {
     }, options?: CreateItemOptions): Promise<T>;
     getAll(): Promise<T[]>;
     getAllRaw(): Promise<{}[]>;
+    getItems(items: any[]): Promise<T[]>;
     protected getAllBase(transform: (x: any[]) => any): Promise<any[]>;
     update(data: {
         [key: string]: {};
