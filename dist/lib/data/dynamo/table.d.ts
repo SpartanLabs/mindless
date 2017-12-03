@@ -1,4 +1,4 @@
-import { CreateItemOptions, ModelConfiguration, UpdateItemOptions, DestroyItemOptions } from 'dynogels';
+import { CreateItemOptions, ModelConfiguration, UpdateItemOptions, DestroyItemOptions, GetItemOptions } from 'dynogels';
 import { Dynamo } from './dynamo';
 export declare abstract class DynamoTable<T> {
     private dynamo;
@@ -12,7 +12,8 @@ export declare abstract class DynamoTable<T> {
     }, options?: CreateItemOptions): Promise<T>;
     getAll(): Promise<T[]>;
     getAllRaw(): Promise<{}[]>;
-    getItems(items: any[]): Promise<T[]>;
+    getItems(items: any[], options?: GetItemOptions): Promise<T[]>;
+    get(hashKey: string, options?: GetItemOptions, rangeKey?: string): Promise<{}>;
     protected getAllBase(transform: (x: any[]) => any): Promise<any[]>;
     update(data: {
         [key: string]: {};

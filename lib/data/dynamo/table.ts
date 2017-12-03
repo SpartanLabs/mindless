@@ -1,4 +1,4 @@
-import { DynogelsItemCallback, CreateItemOptions, Model, ModelConfiguration, Document, DocumentCollection, UpdateItemOptions, DestroyItemOptions } from 'dynogels';
+import { DynogelsItemCallback, CreateItemOptions, Model, ModelConfiguration, Document, DocumentCollection, UpdateItemOptions, DestroyItemOptions, GetItemOptions } from 'dynogels';
 import { injectable, inject } from 'inversify';
 
 import { Dynamo } from './dynamo';
@@ -45,7 +45,7 @@ export abstract class DynamoTable<T> {
         return this.getAllBase(x => x);
     }
 
-    public getItems(items: any[]): Promise<T[]> {
+    public getItems(items: any[], options: GetItemOptions = {}): Promise<T[]> {
         let transform = (models: T[]) => models.map(model => this.transformToModel(model));
 
         let promiseCallback = (resolve, reject) => {
@@ -60,7 +60,32 @@ export abstract class DynamoTable<T> {
                 }
             }
 
-            this._model.getItems(items, callback);
+            this._model.getItems(items, options, callback);
+        }
+
+        return new Promise(promiseCallback);
+    }
+
+    public get(hashKey: string, options: GetItemOptions = {}, rangeKey?: string) {
+
+        let promiseCallback = (resolve, reject) => {
+            let callback = (err, item) => {
+                if (err) {
+                    console.error(`Error getting items on ${this.tableName} table. Err: ${err}`);
+                    reject(err);
+                }
+                else {
+                    item = this.transformToModel(item);
+                    resolve(item);
+                }
+            }
+
+            if (rangeKey == null) {
+                this._model.get(hashKey, options, callback);
+            }
+            else {
+                this._model.get(hashKey, rangeKey, options, callback);
+            }
         }
 
         return new Promise(promiseCallback);
