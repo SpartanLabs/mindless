@@ -45,6 +45,27 @@ export abstract class DynamoTable<T> {
         return this.getAllBase(x => x);
     }
 
+    public getItems(items: any[]): Promise<T[]> {
+        let transform = (models: T[]) => models.map(model => this.transformToModel(model));
+
+        let promiseCallback = (resolve, reject) => {
+            let callback = (err, items: any[]) => {
+                if (err) {
+                    console.error(`Error getting items on ${this.tableName} table. Err: ${err}`);
+                    reject(err);
+                }
+                else {
+                    items = transform(items);
+                    resolve(items);
+                }
+            }
+
+            this._model.getItems(items, callback);
+        }
+
+        return new Promise(promiseCallback);
+    }
+
     protected getAllBase(transform: (x: any[]) => any): Promise<any[]> {
         let promiseCallback = (resolve, reject) => {
 
