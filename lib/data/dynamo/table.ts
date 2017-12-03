@@ -66,7 +66,7 @@ export abstract class DynamoTable<T> {
         return new Promise(promiseCallback);
     }
 
-    public get(hashKey: string, options: GetItemOptions = {}, rangeKey?: string) {
+    public get(hashKey: string, options: GetItemOptions = {}, rangeKey?: string): Promise<T> {
 
         let promiseCallback = (resolve, reject) => {
             let callback = (err, item) => {
