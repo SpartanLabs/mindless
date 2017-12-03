@@ -44,8 +44,9 @@ var DynamoTable = (function () {
     DynamoTable.prototype.getAllRaw = function () {
         return this.getAllBase(function (x) { return x; });
     };
-    DynamoTable.prototype.getItems = function (items) {
+    DynamoTable.prototype.getItems = function (items, options) {
         var _this = this;
+        if (options === void 0) { options = {}; }
         var transform = function (models) { return models.map(function (model) { return _this.transformToModel(model); }); };
         var promiseCallback = function (resolve, reject) {
             var callback = function (err, items) {
@@ -58,7 +59,30 @@ var DynamoTable = (function () {
                     resolve(items);
                 }
             };
-            _this._model.getItems(items, callback);
+            _this._model.getItems(items, options, callback);
+        };
+        return new Promise(promiseCallback);
+    };
+    DynamoTable.prototype.get = function (hashKey, options, rangeKey) {
+        var _this = this;
+        if (options === void 0) { options = {}; }
+        var promiseCallback = function (resolve, reject) {
+            var callback = function (err, item) {
+                if (err) {
+                    console.error("Error getting items on " + _this.tableName + " table. Err: " + err);
+                    reject(err);
+                }
+                else {
+                    item = _this.transformToModel(item);
+                    resolve(item);
+                }
+            };
+            if (rangeKey == null) {
+                _this._model.get(hashKey, options, callback);
+            }
+            else {
+                _this._model.get(hashKey, rangeKey, options, callback);
+            }
         };
         return new Promise(promiseCallback);
     };
