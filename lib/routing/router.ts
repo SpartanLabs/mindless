@@ -44,14 +44,17 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
    */
   private addRouteMetaDataToRequest() {
 
-    let narrowedRoute: R = Object.create(this.subjectRoute);
+    let narrowedRoute;
 
     /**
      * controller and middleware are constructors 
      * there should be no need for them outside of this router
      */
-    delete narrowedRoute.controller;
-    delete narrowedRoute.middleware;
+    for (let prop in this.subjectRoute) {
+      if (this.subjectRoute.hasOwnProperty(prop) && prop != 'controller' && prop != 'middleware') {
+        narrowedRoute[prop] = this.subjectRoute[prop];
+      }
+    }
 
     this.request.RouteMetaData = narrowedRoute;
   }
