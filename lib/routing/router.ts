@@ -44,7 +44,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
    */
   private addRouteMetaDataToRequest() {
 
-    let narrowedRoute;
+    let narrowedRoute = {};
 
     /**
      * controller and middleware are constructors 

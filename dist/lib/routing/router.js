@@ -57,7 +57,7 @@ var Router = (function () {
         this.addMiddlewareIfExists(this.subjectRoute.middleware);
     };
     Router.prototype.addRouteMetaDataToRequest = function () {
-        var narrowedRoute;
+        var narrowedRoute = {};
         for (var prop in this.subjectRoute) {
             if (this.subjectRoute.hasOwnProperty(prop) && prop != 'controller' && prop != 'middleware') {
                 narrowedRoute[prop] = this.subjectRoute[prop];
