@@ -15,7 +15,7 @@ export class Dynamo {
         dyn.dynamoDriver(new dyn.AWS.DynamoDB(opts));
     }
 
-    public addDefinition(tableName: string, tableDefnition: dyn.ModelConfiguration) {
+    public addDefinition(tableName: string, tableDefnition: dyn.ModelConfiguration): dyn.Model {
         return dyn.define(tableName, tableDefnition);
     }
 
