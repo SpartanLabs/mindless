@@ -32,6 +32,7 @@ const routes: MindlessRoutes = {
 `Request.RouteMetaData.function`
 `etc`
 
+<i>Note: the controller and middleware elements will not be avialble in RouteMetaData. Why? Because if you need them your using this wrong.
 ```ts
 interface PermissionRoute<M extends Middleware, C extends Controller> extends Route<M, C> {
     permissions?: string[]
