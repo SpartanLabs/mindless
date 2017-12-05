@@ -29,9 +29,7 @@ const routes: MindlessRoutes = {
 * If you want to extend the base controller and base middleware classes you may use the `Routes<M extends Middleware, C extends Controller, R extends Route<M,C>>` generic
 * The Routes object is exteremly flexible, for example say we want to add functionality to gate routes based on permissions. Then we can simply add a `permissions` property to our `Route` object. The permissions array along with the function name and any other elements on the route will be accessible on the request: 
 `Request.RouteMetaData.permissions`
-
 `Request.RouteMetaData.function`
-
 `etc`
 
 ```ts
