@@ -1,11 +1,11 @@
 export declare enum HttpMethods {
-    Get = "GET",
-    Post = "POST",
-    Put = "PUT",
-    Delete = "DELETE",
-    Patch = "PATCH",
-    Options = "OPTIONS",
-    Head = "HEAD",
+    GET,
+    POST,
+    PUT,
+    DELETE,
+    PATCH,
+    OPTIONS,
+    HEAD
 }
 export interface Event {
     headers: {

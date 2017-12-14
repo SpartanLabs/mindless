@@ -27,8 +27,8 @@ export class Request implements IRequest {
         return this.event.resource;
     }
 
-    getRequestMethod() {
-        return this.event.httpMethod.toLowerCase();
+    getRequestMethod(): HttpMethods {
+        return HttpMethods[this.event.httpMethod.toUpperCase()];
     }
 
     get(key: string): any {
