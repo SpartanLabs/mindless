@@ -43,18 +43,36 @@ var Router = (function () {
         this.middleware = [];
     }
     Router.prototype.route = function (routes) {
-        var requestRoute = this.request.getResource();
-        var requestMethod = this.request.getRequestMethod();
-        var routeGroup = routes.routes[requestRoute];
-        this.addMiddlewareIfExists(routes.middleware);
-        this.addMiddlewareIfExists(routeGroup.middleware);
-        if (routeGroup[requestMethod] === undefined) {
-            throw Error("Request method, '" + requestMethod
-                + ", does not exists on route, " + requestRoute + "'.");
+        this.requestRoute = this.request.getResource();
+        this.requestMethod = this.request.getRequestMethod();
+        try {
+            this.subjectRoute = this.getRequestRoute(routes);
         }
-        this.subjectRoute = routeGroup[requestMethod];
+        catch (e) {
+            throw e;
+        }
+        ;
         this.addRouteMetaDataToRequest();
         this.addMiddlewareIfExists(this.subjectRoute.middleware);
+    };
+    Router.prototype.getRequestRoute = function (routes) {
+        var _this = this;
+        var isRequestedRoute = function (route) {
+            if (route.method !== _this.requestMethod) {
+                return false;
+            }
+            var params = route.url.match(_this.requestRoute);
+            if (params) {
+                _this.pathParams = params;
+                return true;
+            }
+            return false;
+        };
+        var route = routes.find(isRequestedRoute);
+        if (route) {
+            return route;
+        }
+        throw Error("Could not find requested route.");
     };
     Router.prototype.addRouteMetaDataToRequest = function () {
         var narrowedRoute = {};
@@ -78,24 +96,47 @@ var Router = (function () {
     };
     Router.prototype.dispatchController = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var subjectController, response, e_1, body;
+            var _this = this;
+            var getParameters, subjectController, params, args, response, e_1, body;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        subjectController = this.container.resolve(this.subjectRoute.controller);
-                        return [4, subjectController[this.subjectRoute["function"]](this.request)];
+                        getParameters = function (func) {
+                            var args = func.toString().match(/function\s.*?\(([^)]*)\)/)[1];
+                            return args.split(",").map(function (arg) {
+                                return arg.replace(/\/\*.*\*\//, "").trim();
+                            }).filter(function (arg) {
+                                return arg;
+                            });
+                        };
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        subjectController = this.container.resolve(this.subjectRoute.controller);
+                        params = getParameters(subjectController[this.subjectRoute["function"]]);
+                        args = params.map(function (param) {
+                            if (param == 'request') {
+                                return _this.request;
+                            }
+                            else if (_this.pathParams.hasOwnProperty(param)) {
+                                return _this.pathParams[param];
+                            }
+                            var msg = "Unable to inject " + param + " into " + _this.subjectRoute.controller.name
+                                + '.' + _this.subjectRoute["function"];
+                            throw Error(msg);
+                        });
+                        return [4, subjectController[this.subjectRoute["function"]].apply(subjectController, args)];
+                    case 2:
                         response = _a.sent();
                         return [2, response];
-                    case 2:
+                    case 3:
                         e_1 = _a.sent();
                         body = {
                             'Error Message': e_1.message,
                             'Mindless Message': 'Unable to resolve requested controller or method make sure your routes are configured properly'
                         };
                         return [2, new response_1.Response(500, body)];
-                    case 3: return [2];
+                    case 4: return [2];
                 }
             });
         });
