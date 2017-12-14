@@ -1,4 +1,3 @@
-import { strictEqual } from 'assert';
 import { Route } from './routes';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
