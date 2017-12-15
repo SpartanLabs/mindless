@@ -97,24 +97,22 @@ var Router = (function () {
     Router.prototype.dispatchController = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
-            var getParameters, subjectController, params, args, response, e_1, body;
+            var getParameters, subjectController, params, getArgToInject, args, response, e_1, body;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         getParameters = function (func) {
                             var args = func.toString().match(/function\s.*?\(([^)]*)\)/)[1];
-                            return args.split(",").map(function (arg) {
-                                return arg.replace(/\/\*.*\*\//, "").trim();
-                            }).filter(function (arg) {
-                                return arg;
-                            });
+                            return args.split(",")
+                                .map(function (arg) { return arg.replace(/\/\*.*\*\//, "").trim(); })
+                                .filter(function (arg) { return arg; });
                         };
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
                         subjectController = this.container.resolve(this.subjectRoute.controller);
                         params = getParameters(subjectController[this.subjectRoute["function"]]);
-                        args = params.map(function (param) {
+                        getArgToInject = function (param) {
                             if (param == 'request') {
                                 return _this.request;
                             }
@@ -124,7 +122,8 @@ var Router = (function () {
                             var msg = "Unable to inject " + param + " into " + _this.subjectRoute.controller.name
                                 + '.' + _this.subjectRoute["function"];
                             throw Error(msg);
-                        });
+                        };
+                        args = params.map(getArgToInject);
                         return [4, subjectController[this.subjectRoute["function"]].apply(subjectController, args)];
                     case 2:
                         response = _a.sent();
