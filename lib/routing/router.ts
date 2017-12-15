@@ -94,33 +94,32 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
 
   public async dispatchController(): Promise<Response> {
     const getParameters = (func) => {
-      // First match everything inside the function argument parens.
+      // match everything inside the function argument parens
       var args = func.toString().match(/function\s.*?\(([^)]*)\)/)[1];
      
-      // Split the arguments string into an array comma delimited.
-      return args.split(",").map(function(arg) {
-        // Ensure no inline comments are parsed and trim the whitespace.
-        return arg.replace(/\/\*.*\*\//, "").trim();
-      }).filter(function(arg) {
-        // Ensure no undefineds are added.
-        return arg;
-      });
+      return args.split(",")
+                .map(arg => arg.replace(/\/\*.*\*\//, "").trim()) // get rid of inline comments, trim whitespace
+                .filter(arg => arg); // dont add undefineds
     }
 
     try {
       let subjectController: C = this.container.resolve(this.subjectRoute.controller);
       const params = getParameters(subjectController[this.subjectRoute.function]); // TODO: run all this on construction maybe.
 
-      let args = params.map(param => {
+      const getArgToInject = (param) => {
         if (param == 'request') {
           return this.request;
         } else if (this.pathParams.hasOwnProperty(param)) {
           return this.pathParams[param];
         }
+
         const msg = "Unable to inject " + param + " into " + this.subjectRoute.controller.name 
                   + '.' + this.subjectRoute.function;
+
         throw Error(msg);
-      });
+      };
+
+      let args = params.map(getArgToInject);
       
       let response: Response = await subjectController[this.subjectRoute.function](...args);
       return response;
