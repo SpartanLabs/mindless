@@ -1,4 +1,4 @@
-import { Event, HttpMethods } from './event';
+import { Event } from './event';
 import { IRequest } from './request-interface';
 export declare class Request implements IRequest {
     protected event: Event;
@@ -8,7 +8,7 @@ export declare class Request implements IRequest {
     RouteMetaData: any;
     constructor(event: Event);
     getResource(): string;
-    getRequestMethod(): HttpMethods;
+    getRequestMethod(): string;
     get(key: string): any;
     header(key: string): string;
     add(key: string, val: any, overwrite?: boolean): void;

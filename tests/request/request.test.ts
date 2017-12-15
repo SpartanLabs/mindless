@@ -10,7 +10,7 @@ function getEvent(): Event {
         pathParameters: {},
         requestContext: {},
         resource: "",
-        httpMethod: "GET",
+        httpMethod: HttpMethods.Get,
         queryStringParameters: {},
         stageVariables: {},
         body: ""
@@ -27,7 +27,7 @@ describe('Test request constructor', () => {
     test('empty event', () => {
         let request = new Request(localEvent);
         expect(request.getResource()).toBe("");
-        expect(request.getRequestMethod()).toBe(HttpMethods.GET);
+        expect(request.getRequestMethod()).toBe('get');
     });
 
     test('successfully parses json event body', () => {
