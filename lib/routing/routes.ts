@@ -1,21 +1,26 @@
 import { GenericConstructor } from '../interfaces';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
-import { HttpMethods } from '../request/event';
-import * as RPRoute from 'route-parser';
 
-// don't want to tie user code to route-parser.
-// this allows us to change with out requiring usrs to.
-export class RouteUrl extends RPRoute {
 
-}
-
-export interface Route<M extends Middleware, C extends Controller> {
-  url: RouteUrl,
-  method: HttpMethods,
+export interface Route<M extends Middleware, C extends Controller>  {
   controller: GenericConstructor<C>,
   function: string,
   middleware?: GenericConstructor<M>[]
 }
-export type MindlessRoute = Route<Middleware, Controller>;
 
+export interface Routes<M extends Middleware, C extends Controller, R extends Route<M,C>>  {
+  middleware?: GenericConstructor<M>[],
+  routes: {
+    [key: string]: {
+      middleware?: GenericConstructor<M>[],
+      post?: R,
+      get?: R,
+      put?: R,
+      delete?: R
+    }
+  }
+}
+
+export type MindlessRoute = Route<Middleware, Controller>;
+export type MindlessRoutes = Routes<Middleware, Controller, MindlessRoute>; 
