@@ -19,9 +19,11 @@
     },
     "dependencies": {
         "@types/dynogels": "^8.0.0",
+        "@types/route-parser": "^0.1.1",
         "dynogels": "^8.0.1",
         "inversify": "^4.3.0",
-        "reflect-metadata": "^0.1.10"
+        "reflect-metadata": "^0.1.10",
+        "route-parser": "^0.0.5"
     },
     "scripts": {
         "build": "rm -rf ./dist && tsc",

@@ -1,5 +1,6 @@
 "use strict";
 exports.__esModule = true;
+var event_1 = require("./event");
 var Request = (function () {
     function Request(event) {
         this.event = event;
@@ -23,7 +24,7 @@ var Request = (function () {
         return this.event.resource;
     };
     Request.prototype.getRequestMethod = function () {
-        return this.event.httpMethod.toLowerCase();
+        return event_1.HttpMethods[this.event.httpMethod.toUpperCase()];
     };
     Request.prototype.get = function (key) {
         if (this.event.pathParameters.hasOwnProperty(key)) {

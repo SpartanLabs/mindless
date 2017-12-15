@@ -28,25 +28,9 @@ const getEvent = (): Event => {
         pathParameters: {},
         requestContext: {},
         resource: "",
-        httpMethod: HttpMethods.Get,
+        httpMethod: "GET",
         queryStringParameters: {},
         stageVariables: {},
         body: ""
     };
-}
-
-class InDependentMiddleware extends Middleware {
-    protected uid: string = "indep1";
-
-    protected handle(): Promise<string> {
-        return Promise.resolve("abc");
-    }
-}
-
-class DependentMiddleware1 extends Middleware {
-    protected uid: string = "dep1";
-
-    protected handle(): Promise<string> {
-        return Promise.resolve("efg");
-    }
 }

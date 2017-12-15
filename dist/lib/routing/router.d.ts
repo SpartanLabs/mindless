@@ -1,4 +1,4 @@
-import { Routes, Route } from './routes';
+import { Route } from './routes';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
 import { Request } from '../request/request';
@@ -9,8 +9,12 @@ export declare class Router<M extends Middleware, C extends Controller, R extend
     private container;
     private middleware;
     private subjectRoute;
+    private requestRoute;
+    private requestMethod;
+    private pathParams;
     constructor(request: Request, container: Container);
-    route(routes: Routes<M, C, R>): void;
+    route(routes: R[]): void;
+    protected getRequestRoute(routes: R[]): R;
     private addRouteMetaDataToRequest();
     private addMiddlewareIfExists(middleware);
     dispatchMiddleware(): Promise<any>;
