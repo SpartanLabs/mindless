@@ -36,26 +36,29 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
     this.addMiddlewareIfExists(this.subjectRoute.middleware);
   }
 
-  protected getRequestRoute(routes: R[]): R {
-    const isRequestedRoute = (route) => {
-      if (route.method !== this.requestMethod) {
-        return false;
-      }
-      let params = route.url.match(this.requestRoute);
-      if (params) {
-        this.pathParams = params;
-        return true;
-      }
-      return false;
-    };
+  
 
-    let route = routes.find(isRequestedRoute);
+  protected getRequestRoute(routes: R[]): R {
+
+    let route = routes.find(this.isRequestedRoute);
 
     if (route) {
       return route;
     }
     throw Error("Could not find requested route.");
   }
+
+  private isRequestedRoute = (route) => {
+    if (route.method !== this.requestMethod) {
+      return false;
+    }
+    let params = route.url.match(this.requestRoute);
+    if (params) {
+      this.pathParams = params;
+      return true;
+    }
+    return false;
+  };
 
   /**
    * May be useful to have access to the route data
@@ -93,33 +96,15 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
   }
 
   public async dispatchController(): Promise<Response> {
-    const getParameters = (func) => {
-      // match everything inside the function argument parens
-      var args = func.toString().match(/function\s.*?\(([^)]*)\)/)[1];
-     
-      return args.split(",")
-                .map(arg => arg.replace(/\/\*.*\*\//, "").trim()) // get rid of inline comments, trim whitespace
-                .filter(arg => arg); // dont add undefineds
-    }
+    
 
     try {
       let subjectController: C = this.container.resolve(this.subjectRoute.controller);
-      const params = getParameters(subjectController[this.subjectRoute.function]); // TODO: run all this on construction maybe.
+      const params = Router.getParameters(subjectController[this.subjectRoute.function]); // TODO: run all this on construction maybe.
 
-      const getArgToInject = (param) => {
-        if (param == 'request') {
-          return this.request;
-        } else if (this.pathParams.hasOwnProperty(param)) {
-          return this.pathParams[param];
-        }
 
-        const msg = "Unable to inject " + param + " into " + this.subjectRoute.controller.name 
-                  + '.' + this.subjectRoute.function;
 
-        throw Error(msg);
-      };
-
-      let args = params.map(getArgToInject);
+      let args = params.map(this.getArgToInject);
       
       let response: Response = await subjectController[this.subjectRoute.function](...args);
       return response;
@@ -131,4 +116,26 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
       return new Response(500, body);
     }
   }
+
+  private static getParameters = (func) => {
+    // match everything inside the function argument parens
+    var args = func.toString().match(/function\s.*?\(([^)]*)\)/)[1];
+   
+    return args.split(",")
+              .map(arg => arg.replace(/\/\*.*\*\//, "").trim()) // get rid of inline comments, trim whitespace
+              .filter(arg => arg); // dont add undefineds
+  }
+
+  private getArgToInject = (param) => {
+    if (param == 'request') {
+      return this.request;
+    } else if (this.pathParams.hasOwnProperty(param)) {
+      return this.pathParams[param];
+    }
+
+    const msg = "Unable to inject " + param + " into " + this.subjectRoute.controller.name 
+              + '.' + this.subjectRoute.function;
+
+    throw Error(msg);
+  };
 }
