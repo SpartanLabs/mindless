@@ -1,11 +1,11 @@
 export enum HttpMethods {
-  Get = "GET",
-  Post = "POST",
-  Put = "PUT",
-  Delete = "DELETE",
-  Patch = "PATCH",
-  Options = "OPTIONS",
-  Head = "HEAD"
+  GET,
+  POST,
+  PUT,
+  DELETE,
+  PATCH,
+  OPTIONS,
+  HEAD
 }
 
 export interface Event {
@@ -14,7 +14,7 @@ export interface Event {
   pathParameters: { [key: string]: string },
   requestContext: { [key: string]: any },
   resource: string,
-  httpMethod: HttpMethods,
+  httpMethod: string,
   queryStringParameters: { [key: string]: any },
   stageVariables: { [key: string]: any },
   body: string,

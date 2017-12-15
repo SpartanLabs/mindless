@@ -1,42 +1,61 @@
-import { Routes, Route } from './routes';
+import { Route } from './routes';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
 import { GenericConstructor } from '../interfaces';
 import { Request } from '../request/request';
 import { Response } from '../response';
 import { Container } from 'inversify';
+import { HttpMethods } from '../request/event';
 
 
 export class Router<M extends Middleware, C extends Controller, R extends Route<M, C>> {
 
   private middleware: GenericConstructor<M>[] = [];
-  private subjectRoute: Route<M, C>;
+  private subjectRoute: R; 
+  private requestRoute: string;
+  private requestMethod: HttpMethods;
+  private pathParams: {};
 
   constructor(
     private request: Request,
     private container: Container
   ) { }
 
-  public route(routes: Routes<M, C, R>): void {
-    let requestRoute: string = this.request.getResource()
-    let requestMethod: string = this.request.getRequestMethod();
-    let routeGroup = routes.routes[requestRoute];
+  public route(routes: R[]): void {
+    this.requestRoute = this.request.getResource()
+    this.requestMethod = this.request.getRequestMethod();
 
-    this.addMiddlewareIfExists(routes.middleware);
-    this.addMiddlewareIfExists(routeGroup.middleware);
-
-    if (routeGroup[requestMethod] === undefined) {
-      // error route does not exists;
-      throw Error("Request method, '" + requestMethod
-        + ", does not exists on route, " + requestRoute + "'.");
-    }
-
-    this.subjectRoute = routeGroup[requestMethod];
+    try {
+      this.subjectRoute = this.getRequestRoute(routes);
+    } catch (e) {
+      throw e; // could not find route, lets just throw for now.
+    };
 
     this.addRouteMetaDataToRequest();
-
     this.addMiddlewareIfExists(this.subjectRoute.middleware);
   }
+
+  protected getRequestRoute(routes: R[]): R {
+
+    let route = routes.find(this.isRequestedRoute);
+
+    if (route) {
+      return route;
+    }
+    throw Error("Could not find requested route.");
+  }
+
+  private isRequestedRoute = (route) => {
+    if (route.method !== this.requestMethod) {
+      return false;
+    }
+    let params = route.url.match(this.requestRoute);
+    if (params) {
+      this.pathParams = params;
+      return true;
+    }
+    return false;
+  };
 
   /**
    * May be useful to have access to the route data
@@ -44,7 +63,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
    */
   private addRouteMetaDataToRequest() {
 
-    let narrowedRoute = {};
+    let narrowedRoute: any = {};
 
     /**
      * controller and middleware are constructors 
@@ -55,7 +74,6 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
         narrowedRoute[prop] = this.subjectRoute[prop];
       }
     }
-
     this.request.RouteMetaData = narrowedRoute;
   }
 
@@ -65,7 +83,6 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
     }
   }
 
-
   public dispatchMiddleware(): Promise<any> {
     const promises: Promise<any>[] = this.middleware.map(constructor => this.container.resolve(constructor))
       .map(object => object.handle(this.request));
@@ -74,9 +91,13 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
   }
 
   public async dispatchController(): Promise<Response> {
+
     try {
       let subjectController: C = this.container.resolve(this.subjectRoute.controller);
-      let response: Response = await subjectController[this.subjectRoute.function](this.request);
+      const params = Router.getParameters(subjectController[this.subjectRoute.function]); // TODO: run all this on construction maybe.
+      let args = params.map(this.getArgToInject);
+      
+      let response: Response = await subjectController[this.subjectRoute.function](...args);
       return response;
     } catch (e) {
       let body = {
@@ -86,4 +107,26 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
       return new Response(500, body);
     }
   }
+
+  private static getParameters = (func) => {
+    // match everything inside the function argument parens
+    var args = func.toString().match(/function\s.*?\(([^)]*)\)/)[1];
+   
+    return args.split(",")
+              .map(arg => arg.replace(/\/\*.*\*\//, "").trim()) // get rid of inline comments, trim whitespace
+              .filter(arg => arg); // dont add undefineds
+  }
+
+  private getArgToInject = (param) => {
+    if (param == 'request') {
+      return this.request;
+    } else if (this.pathParams.hasOwnProperty(param)) {
+      return this.pathParams[param];
+    }
+
+    const msg = "Unable to inject " + param + " into " + this.subjectRoute.controller.name 
+              + '.' + this.subjectRoute.function;
+
+    throw Error(msg);
+  };
 }

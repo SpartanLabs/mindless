@@ -1,11 +1,11 @@
 export declare enum HttpMethods {
-    Get = "GET",
-    Post = "POST",
-    Put = "PUT",
-    Delete = "DELETE",
-    Patch = "PATCH",
-    Options = "OPTIONS",
-    Head = "HEAD",
+    GET = 0,
+    POST = 1,
+    PUT = 2,
+    DELETE = 3,
+    PATCH = 4,
+    OPTIONS = 5,
+    HEAD = 6,
 }
 export interface Event {
     headers: {
@@ -19,7 +19,7 @@ export interface Event {
         [key: string]: any;
     };
     resource: string;
-    httpMethod: HttpMethods;
+    httpMethod: string;
     queryStringParameters: {
         [key: string]: any;
     };

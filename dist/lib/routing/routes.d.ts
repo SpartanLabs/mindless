@@ -1,22 +1,15 @@
 import { GenericConstructor } from '../interfaces';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
+import { HttpMethods } from '../request/event';
+import * as RPRoute from 'route-parser';
+export declare class RouteUrl extends RPRoute {
+}
 export interface Route<M extends Middleware, C extends Controller> {
+    url: RouteUrl;
+    method: HttpMethods;
     controller: GenericConstructor<C>;
     function: string;
     middleware?: GenericConstructor<M>[];
 }
-export interface Routes<M extends Middleware, C extends Controller, R extends Route<M, C>> {
-    middleware?: GenericConstructor<M>[];
-    routes: {
-        [key: string]: {
-            middleware?: GenericConstructor<M>[];
-            post?: R;
-            get?: R;
-            put?: R;
-            delete?: R;
-        };
-    };
-}
 export declare type MindlessRoute = Route<Middleware, Controller>;
-export declare type MindlessRoutes = Routes<Middleware, Controller, MindlessRoute>;
