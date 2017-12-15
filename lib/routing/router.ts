@@ -32,11 +32,8 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
     };
 
     this.addRouteMetaDataToRequest();
-
     this.addMiddlewareIfExists(this.subjectRoute.middleware);
   }
-
-  
 
   protected getRequestRoute(routes: R[]): R {
 
@@ -77,7 +74,6 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
         narrowedRoute[prop] = this.subjectRoute[prop];
       }
     }
-
     this.request.RouteMetaData = narrowedRoute;
   }
 
@@ -87,7 +83,6 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
     }
   }
 
-
   public dispatchMiddleware(): Promise<any> {
     const promises: Promise<any>[] = this.middleware.map(constructor => this.container.resolve(constructor))
       .map(object => object.handle(this.request));
@@ -96,14 +91,10 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
   }
 
   public async dispatchController(): Promise<Response> {
-    
 
     try {
       let subjectController: C = this.container.resolve(this.subjectRoute.controller);
       const params = Router.getParameters(subjectController[this.subjectRoute.function]); // TODO: run all this on construction maybe.
-
-
-
       let args = params.map(this.getArgToInject);
       
       let response: Response = await subjectController[this.subjectRoute.function](...args);
