@@ -1,5 +1,5 @@
-import { Request } from '../../lib/request';
-import { Event, HttpMethods } from '../../lib/request/event';
+import { Request } from '../../';
+import { Event, HttpMethods } from '../../';
 
 import * as TypeMoq from 'typemoq';
 

@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 
-import { MINDLESS_SERVICE_INDENTIFIERS } from '../lib/types';
-import { ConfigurationManager, DefaultConfig, MindlessConfig } from '../lib/configs';
-import { registerProviders } from '../lib/providers';
+import { MINDLESS_SERVICE_INDENTIFIERS } from '../';
+import { DefaultConfig, MindlessConfig } from '../';
+import { registerProviders } from '../';
 import { Container, injectable } from "inversify";
 
 describe('registerProviders', () => {
@@ -28,7 +28,7 @@ describe('registerProviders', () => {
         container.bind<MindlessConfig>(MINDLESS_SERVICE_INDENTIFIERS.MindlessConfig).to(CustomConfig);
 
         registerProviders(container);
-        
+
         expect(container.get<MindlessConfig>(MINDLESS_SERVICE_INDENTIFIERS.MindlessConfig).dynamoEndpoint).toEqual("MyCustomEndpoint");
     });
 });
