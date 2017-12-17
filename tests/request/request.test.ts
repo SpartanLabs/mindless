@@ -1,5 +1,5 @@
-import { Request } from '../../lib/request';
-import { Event, HttpMethods } from '../../lib/request/event';
+import 'reflect-metadata';
+import { Event, HttpMethods, Request } from '../../lib/request';
 
 import * as TypeMoq from 'typemoq';
 
@@ -44,7 +44,7 @@ describe('Test request constructor', () => {
 
         expect(request.get('name')).toBe("zach");
         expect(request.get('number')).toBe(12345);
-        expect(request.get('things')).toEqual(['a','b','c']);
+        expect(request.get('things')).toEqual(['a', 'b', 'c']);
     });
 
     // needed to not break Request.get()
@@ -55,12 +55,12 @@ describe('Test request constructor', () => {
         defaultEvent.headers = null;
 
         let request = new Request(defaultEvent);
-        expect(() => {request.get('abc')}).toThrow(/key not found/);
+        expect(() => { request.get('abc') }).toThrow(/key not found/);
     });
 });
 
 describe('Test request get method', () => {
-    const localEvent = getEvent(); 
+    const localEvent = getEvent();
     test('get path parameters', () => {
         let defaultEvent = Object.assign({}, localEvent);
         defaultEvent.pathParameters['param'] = 'abc';
@@ -72,20 +72,20 @@ describe('Test request get method', () => {
     });
 
     test('get query string parameters', () => {
-        let defaultEvent = getEvent(); 
+        let defaultEvent = getEvent();
         defaultEvent.queryStringParameters['param'] = 'abc';
-        
+
         let request = new Request(defaultEvent);
 
         let actualRetrievedValue = request.get('param');
 
         expect(actualRetrievedValue).toBe('abc');
     });
-    
+
     test('get body  parameters', () => {
-        let defaultEvent = getEvent(); 
-      
-        defaultEvent.body = JSON.stringify({'param': 'abc'});
+        let defaultEvent = getEvent();
+
+        defaultEvent.body = JSON.stringify({ 'param': 'abc' });
 
         let request = new Request(defaultEvent);
 
@@ -95,14 +95,14 @@ describe('Test request get method', () => {
     });
 
     test('invalid key', () => {
-        let defaultEvent = getEvent(); 
+        let defaultEvent = getEvent();
         defaultEvent.pathParameters['test'] = 'abc';
         defaultEvent.queryStringParameters['testb'] = 'abc';
-        defaultEvent.body = JSON.stringify({'testc': 'abc'});
+        defaultEvent.body = JSON.stringify({ 'testc': 'abc' });
 
         let request = new Request(defaultEvent);
 
-        expect(() => {request.get('abc')}).toThrow(/key not found/);
+        expect(() => { request.get('abc') }).toThrow(/key not found/);
     })
 });
 
@@ -111,7 +111,7 @@ describe('Test request header', () => {
         let event = getEvent();
         let request = new Request(event);
 
-        expect(() => {request.header('abc')}).toThrow(/key not found/);
+        expect(() => { request.header('abc') }).toThrow(/key not found/);
     });
 
     test('retrieve header value', () => {
@@ -125,19 +125,19 @@ describe('Test request header', () => {
 });
 
 describe('Test request add method', () => {
-    
+
     let event = getEvent();
     let request = new Request(event);
-    
+
     test('Add new key,val pair', () => {
-       request.add('abc', 'val');
-       let retrievedVal = request.get('abc');
-       
-       expect(retrievedVal).toBe('val');
+        request.add('abc', 'val');
+        let retrievedVal = request.get('abc');
+
+        expect(retrievedVal).toBe('val');
     });
 
     test('Add new key,val pair with already existing key', () => {
-        
+
         let addKeyAlreadyExists = () => {
             request.add('abc', 'val2');
         };

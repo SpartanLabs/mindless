@@ -1,11 +1,10 @@
-import * as console from 'console';
-import { HttpMethods } from '../../lib/request/event';
-import { Response } from '../../lib/response';
 import 'reflect-metadata';
+import * as console from 'console';
+import { HttpMethods, Request } from '../../lib/request';
+import { Response } from '../../lib/response';
 import { Route, Router, MindlessRoute, RouteUrl } from '../../lib/routing';
-import { Controller } from '../../lib/controller/controller';
-import { Middleware } from '../../lib/middleware/middleware';
-import { Request } from '../../lib/request';
+import { Controller } from '../..';
+import { Middleware } from '../..';
 import { Container } from 'inversify';
 
 import * as TypeMoq from 'typemoq';

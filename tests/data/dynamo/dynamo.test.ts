@@ -1,6 +1,7 @@
 import 'reflect-metadata';
+
 import { DefaultConfig } from '../../../lib/configs';
-import { Dynamo } from '../../../lib/data/dynamo/dynamo';
+import { Dynamo } from '../../../';
 import * as TypeMoq from 'typemoq';
 
 describe('Test dynamo constructor', () => {

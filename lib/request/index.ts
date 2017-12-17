@@ -1,2 +1,2 @@
 export { Request } from './request';
-export { Event } from './event';
+export { Event, HttpMethods } from './event';
