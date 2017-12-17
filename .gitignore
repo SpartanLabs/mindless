@@ -6,3 +6,4 @@ dist/tests
 yarn-error.log
 package-lock.json
 coverage
+npm-debug.log
