@@ -1,5 +1,6 @@
 import 'reflect-metadata';
-import { DefaultConfig } from '../../../';
+
+import { DefaultConfig } from '../../../lib/configs';
 import { Dynamo } from '../../../';
 import * as TypeMoq from 'typemoq';
 

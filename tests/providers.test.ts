@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 
-import { MINDLESS_SERVICE_INDENTIFIERS } from '../';
-import { DefaultConfig, MindlessConfig } from '../';
-import { registerProviders } from '../';
+import { MINDLESS_SERVICE_INDENTIFIERS } from '../lib/types';
+import { DefaultConfig, MindlessConfig } from '../lib/configs';
+import { registerProviders } from '../lib/providers';
 import { Container, injectable } from "inversify";
 
 describe('registerProviders', () => {

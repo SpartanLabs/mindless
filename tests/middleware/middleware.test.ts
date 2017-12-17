@@ -1,9 +1,10 @@
-import { HttpMethods, Event } from '../../';
-import { EventEmitter } from 'events';
 import 'reflect-metadata';
+
+import { EventEmitter } from 'events';
 import { Middleware } from '../../';
 import { Readable } from 'stream';
-import { Request } from '../../';
+import { Request, HttpMethods, Event } from '../../lib/request';
+
 const getEvent = (): Event => {
     return {
         headers: {},
