@@ -2,6 +2,3 @@
 
 # mindless
 Library for creating APIs with TypeScript
-
-### Router
-
