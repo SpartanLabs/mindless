@@ -120,7 +120,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
   private getArgToInject = (param) => {
     if (param == 'request') {
       return this.request;
-    } else if ('undefined' !== this.pathParams[param]) {
+    } else if ('undefined' !== typeof this.pathParams[param]) {
       return this.pathParams[param];
     }
 
