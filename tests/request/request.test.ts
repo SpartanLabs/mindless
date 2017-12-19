@@ -59,7 +59,7 @@ describe('Test request constructor', () => {
     });
 });
 
-describe('Test request get method', () => {
+describe('Test request get method ', () => {
     const localEvent = getEvent();
     test('get path parameters', () => {
         let defaultEvent = Object.assign({}, localEvent);
@@ -82,7 +82,7 @@ describe('Test request get method', () => {
         expect(actualRetrievedValue).toBe('abc');
     });
 
-    test('get body  parameters', () => {
+    test('get body parameters', () => {
         let defaultEvent = getEvent();
 
         defaultEvent.body = JSON.stringify({ 'param': 'abc' });
@@ -103,7 +103,20 @@ describe('Test request get method', () => {
         let request = new Request(defaultEvent);
 
         expect(() => { request.get('abc') }).toThrow(/key not found/);
-    })
+    });
+
+    test('optional key not found returns undefined', () => {
+        let defaultEvent = getEvent();
+        defaultEvent.pathParameters['test'] = 'abc';
+        defaultEvent.queryStringParameters['testb'] = 'abc';
+        defaultEvent.body = JSON.stringify({ 'testc': 'abc' });
+
+        let request = new Request(defaultEvent);
+
+        let retrievedValue = request.get('abc', false);
+
+        expect(retrievedValue).toBe(undefined);
+    });
 });
 
 describe('Test request header', () => {
