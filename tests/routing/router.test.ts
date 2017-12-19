@@ -16,14 +16,14 @@ class TestController extends Controller {
     }
     // Note: Request parameter 
     testWithRequestParam(request: Request) {
-        return new Response(200, { resource: request.getResource() });
+        return new Response(200, { resource: request.getPath() });
     }
     testWithPathParam(val: string): Response {
         return new Response(200, { val: val });
     }
     testWithRequestAndPathParam(request: Request, val: string) {
         const res = {
-            resource: request.getResource(),
+            resource: request.getPath(),
             val: val
         };
         return new Response(200, res);
@@ -45,7 +45,7 @@ describe('Test router route method', () => {
         }
     ];
 
-    requestMock.setup(c => c.getResource()).returns(() => '/test');
+    requestMock.setup(c => c.getPath()).returns(() => '/test');
     requestMock.setup(c => c.getRequestMethod()).returns(() => HttpMethods.GET);
 
     test('Throws error when route group undefined', () => {
@@ -69,7 +69,7 @@ describe('Test router dispatchController method', () => {
         }
     ];
 
-    requestMock.setup(c => c.getResource()).returns(() => '/test');
+    requestMock.setup(c => c.getPath()).returns(() => '/test');
     requestMock.setup(c => c.getRequestMethod()).returns(() => HttpMethods.POST);
     let router = new Router<Middleware, Controller, Route<Middleware, Controller>>(requestMock.object, containerMock.object);
     router.route(routes);
@@ -135,7 +135,7 @@ describe('Test router dispactControlelr with path parameters', () => {
         let requestMock = TypeMoq.Mock.ofType<Request>();
         let containerMock = TypeMoq.Mock.ofType<Container>();
 
-        requestMock.setup(c => c.getResource()).returns(() => '/test1/' + valParam);
+        requestMock.setup(c => c.getPath()).returns(() => '/test1/' + valParam);
         requestMock.setup(c => c.getRequestMethod()).returns(() => HttpMethods.POST);
 
         let router = new Router<Middleware, Controller, Route<Middleware, Controller>>(requestMock.object, containerMock.object);
@@ -155,7 +155,7 @@ describe('Test router dispactControlelr with path parameters', () => {
         let requestMock = TypeMoq.Mock.ofType<Request>();
         let containerMock = TypeMoq.Mock.ofType<Container>();
 
-        requestMock.setup(c => c.getResource()).returns(() => resource);
+        requestMock.setup(c => c.getPath()).returns(() => resource);
         requestMock.setup(c => c.getRequestMethod()).returns(() => HttpMethods.POST);
 
         let router = new Router<Middleware, Controller, Route<Middleware, Controller>>(requestMock.object, containerMock.object);
@@ -175,7 +175,7 @@ describe('Test router dispactControlelr with path parameters', () => {
         let requestMock = TypeMoq.Mock.ofType<Request>();
         let containerMock = TypeMoq.Mock.ofType<Container>();
 
-        requestMock.setup(c => c.getResource()).returns(() => resource);
+        requestMock.setup(c => c.getPath()).returns(() => resource);
         requestMock.setup(c => c.getRequestMethod()).returns(() => HttpMethods.POST);
 
         let router = new Router<Middleware, Controller, Route<Middleware, Controller>>(requestMock.object, containerMock.object);
@@ -194,7 +194,7 @@ describe('Test router dispactControlelr with path parameters', () => {
         let requestMock = TypeMoq.Mock.ofType<Request>();
         let containerMock = TypeMoq.Mock.ofType<Container>();
 
-        requestMock.setup(c => c.getResource()).returns(() => '/test1');
+        requestMock.setup(c => c.getPath()).returns(() => '/test1');
         requestMock.setup(c => c.getRequestMethod()).returns(() => HttpMethods.POST);
 
         let router = new Router<Middleware, Controller, Route<Middleware, Controller>>(requestMock.object, containerMock.object);

@@ -26,7 +26,7 @@ describe('Test request constructor', () => {
 
     test('empty event', () => {
         let request = new Request(localEvent);
-        expect(request.getResource()).toBe("");
+        expect(request.getPath()).toBe("");
         expect(request.getRequestMethod()).toBe(HttpMethods.GET);
     });
 

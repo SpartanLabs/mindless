@@ -23,8 +23,8 @@ export class Request implements IRequest {
         }
     }
 
-    getResource(): string {
-        return this.event.resource;
+    getPath(): string {
+        return this.event.path;
     }
 
     getRequestMethod(): HttpMethods {
