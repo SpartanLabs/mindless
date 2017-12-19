@@ -31,7 +31,7 @@ export class Request implements IRequest {
         return HttpMethods[this.event.httpMethod.toUpperCase()];
     }
 
-    get(key: string): any {
+    get(key: string, failOnNotFound: boolean = true): any {
 
         if (this.event.pathParameters.hasOwnProperty(key)) {
             return this.event.pathParameters[key];
@@ -43,7 +43,10 @@ export class Request implements IRequest {
             return this._body[key];
         }
 
-        throw Error("Invalid key: '" + key + "' , key not found in pathParameters, queryStringParameters, or Body parameters.");
+        if (failOnNotFound) {
+            throw Error("Invalid key: '" + key + "' , key not found in pathParameters, queryStringParameters, or Body parameters.");
+        }
+        return undefined;
     }
 
     header(key: string): string {
