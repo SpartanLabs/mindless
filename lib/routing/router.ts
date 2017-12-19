@@ -12,7 +12,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
 
   private middleware: GenericConstructor<M>[] = [];
   private subjectRoute: R; 
-  private requestRoute: string;
+  private requestPath: string;
   private requestMethod: HttpMethods;
   private pathParams: {};
 
@@ -22,7 +22,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
   ) { }
 
   public route(routes: R[]): void {
-    this.requestRoute = this.request.getResource()
+    this.requestPath = this.request.getPath()
     this.requestMethod = this.request.getRequestMethod();
 
     try {
@@ -49,7 +49,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
     if (route.method !== this.requestMethod) {
       return false;
     }
-    let params = route.url.match(this.requestRoute);
+    let params = route.url.match(this.requestPath);
     if (params) {
       this.pathParams = params;
       return true;
