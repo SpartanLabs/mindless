@@ -70,7 +70,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
      * there should be no need for them outside of this router
      */
     for (let prop in this.subjectRoute) {
-      if (this.subjectRoute.hasOwnProperty(prop) && prop != 'controller' && prop != 'middleware') {
+      if ('undefined' !== typeof this.subjectRoute[prop] && prop != 'controller' && prop != 'middleware') {
         narrowedRoute[prop] = this.subjectRoute[prop];
       }
     }
@@ -120,7 +120,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
   private getArgToInject = (param) => {
     if (param == 'request') {
       return this.request;
-    } else if (this.pathParams.hasOwnProperty(param)) {
+    } else if ('undefined' !== this.pathParams[param]) {
       return this.pathParams[param];
     }
 
