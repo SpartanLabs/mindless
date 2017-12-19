@@ -110,7 +110,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
 
   private static getParameters = (func) => {
     // match everything inside the function argument parens
-    var args = func.toString().match(/function\s.*?\(([^)]*)\)/)[1];
+    let args = func.toString().match(/\(([^)]*)\)/)[1];
    
     return args.split(",")
               .map(arg => arg.replace(/\/\*.*\*\//, "").trim()) // get rid of inline comments, trim whitespace
