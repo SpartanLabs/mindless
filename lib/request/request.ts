@@ -33,13 +33,13 @@ export class Request implements IRequest {
 
     get(key: string): any {
 
-        if (this.event.pathParameters.hasOwnProperty(key)) {
+        if ('undefined' !== typeof this.event.pathParameters[key]) {
             return this.event.pathParameters[key];
         }
-        if (this.event.queryStringParameters.hasOwnProperty(key)) {
+        if ('undefined' !== typeof this.event.queryStringParameters[key]) {
             return this.event.queryStringParameters[key];
         }
-        if (this._body.hasOwnProperty(key)) {
+        if ('undefined' !== typeof this._body[key]) {
             return this._body[key];
         }
 
@@ -47,7 +47,7 @@ export class Request implements IRequest {
     }
 
     header(key: string): string {
-        if (this.event.headers.hasOwnProperty(key)) {
+        if ('undefined' !== typeof this.event.headers[key]) {
             return this.event.headers[key];
         }
 
@@ -55,7 +55,7 @@ export class Request implements IRequest {
     }
 
     add(key: string, val: any, overwrite: boolean = false): void {
-        if (overwrite || !this._body.hasOwnProperty(key)) {
+        if (overwrite || 'undefined' === typeof this._body[key]) {
             this._body[key] = val;
             return;
         }
