@@ -8,7 +8,7 @@ import { MINDLESS_SERVICE_INDENTIFIERS } from '../../types';
 export abstract class DynamoTable<T> {
     protected abstract tableName: string;
     protected abstract definition: ModelConfiguration;
-    protected model: Model;
+    public model: Model;
 
     constructor( @inject(MINDLESS_SERVICE_INDENTIFIERS.Dynamo) private dynamo: Dynamo) {
     }
