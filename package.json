@@ -9,19 +9,20 @@
         "tests": "tests"
     },
     "devDependencies": {
-        "@types/jest": "^21.1.6",
-        "@types/joi": "^10.4.3",
-        "@types/node": "^8.0.31",
         "jest": "^21.2.1",
         "ts-jest": "^21.2.3",
         "typemoq": "^2.0.1",
         "typescript": "^2.5.3"
     },
     "dependencies": {
+        "@types/jest": "^21.1.6",
+        "@types/node": "^8.0.31",
         "@types/dynogels": "^8.0.0",
+        "@types/joi": "^13.0.3",
         "@types/route-parser": "^0.1.1",
         "dynogels": "^8.0.1",
         "inversify": "^4.3.0",
+        "joi": "^13.0.2",
         "reflect-metadata": "^0.1.10",
         "route-parser": "^0.0.5"
     },
