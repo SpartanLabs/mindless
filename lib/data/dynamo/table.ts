@@ -8,13 +8,13 @@ import { MINDLESS_SERVICE_INDENTIFIERS } from '../../types';
 export abstract class DynamoTable<T> {
     protected abstract tableName: string;
     protected abstract definition: ModelConfiguration;
-    private _model: Model;
+    protected model: Model;
 
     constructor( @inject(MINDLESS_SERVICE_INDENTIFIERS.Dynamo) private dynamo: Dynamo) {
     }
 
     protected registerTable() {
-        this._model = this.dynamo.addDefinition(this.tableName, this.definition);
+        this.model = this.dynamo.addDefinition(this.tableName, this.definition);
         // this.dynamo.createTables();
     }
 
@@ -30,7 +30,7 @@ export abstract class DynamoTable<T> {
                 }
             }
 
-            this._model.create(data, options, createModelCallback);
+            this.model.create(data, options, createModelCallback);
         };
 
         return new Promise(promiseCallback)
@@ -60,7 +60,7 @@ export abstract class DynamoTable<T> {
                 }
             }
 
-            this._model.getItems(items, options, callback);
+            this.model.getItems(items, options, callback);
         }
 
         return new Promise(promiseCallback);
@@ -81,10 +81,10 @@ export abstract class DynamoTable<T> {
             }
 
             if (rangeKey == null) {
-                this._model.get(hashKey, options, callback);
+                this.model.get(hashKey, options, callback);
             }
             else {
-                this._model.get(hashKey, rangeKey, options, callback);
+                this.model.get(hashKey, rangeKey, options, callback);
             }
         }
 
@@ -104,7 +104,7 @@ export abstract class DynamoTable<T> {
                 }
             };
 
-            this._model.scan().loadAll().exec(callback);
+            this.model.scan().loadAll().exec(callback);
         };
 
         return new Promise(promiseCallback);
@@ -122,7 +122,7 @@ export abstract class DynamoTable<T> {
                 }
             };
 
-            this._model.update(data, options, callback);
+            this.model.update(data, options, callback);
         }
         return new Promise(promiseCallback);
     }
@@ -140,10 +140,10 @@ export abstract class DynamoTable<T> {
             };
 
             if (rangeKey == null) {
-                this._model.destroy(hashKey, options, callback);
+                this.model.destroy(hashKey, options, callback);
             }
             else {
-                this._model.destroy(hashKey, rangeKey, options, callback);
+                this.model.destroy(hashKey, rangeKey, options, callback);
             }
         }
         return new Promise(promiseCallback);
