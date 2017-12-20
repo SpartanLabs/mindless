@@ -9,9 +9,10 @@ import { DynamoTable } from './table';
 export class Dynamo {
 
     constructor( @inject(MINDLESS_SERVICE_INDENTIFIERS.MindlessConfig) private config: MindlessConfig) {
-        dyn.AWS.config.update({ region: "us-east-1", accessKeyId: "abcd", secretAccessKey: "secret" });
-        const opts = { endpoint: config.dynamoEndpoint }
-        console.log(config);
+        let opts = {};
+        if (config.dynamoEndpoint.length != 0)
+            opts = { endpoint: config.dynamoEndpoint }
+
         dyn.dynamoDriver(new dyn.AWS.DynamoDB(opts));
     }
 

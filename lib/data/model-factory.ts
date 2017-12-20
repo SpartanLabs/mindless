@@ -1,4 +1,4 @@
-import { DestroyItemOptions, UpdateItemOptions, CreateItemOptions, GetItemOptions } from "dynogels";
+import { DestroyItemOptions, UpdateItemOptions, CreateItemOptions, GetItemOptions, Model } from "dynogels";
 
 export interface ModelFactory<T> {
     create(data: { [key: string]: {} }, params?: CreateItemOptions): Promise<T>;
@@ -8,4 +8,5 @@ export interface ModelFactory<T> {
     get(hashKey: string, options?: GetItemOptions, rangeKey?: string): Promise<T>;
     update(data: { [key: string]: {} }, options?: UpdateItemOptions): Promise<T>;
     delete(hashKey: string, rangeKey?: string, options?: DestroyItemOptions): Promise<T>
+    model: Model;
 }

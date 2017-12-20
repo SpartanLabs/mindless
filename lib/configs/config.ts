@@ -6,5 +6,5 @@ export interface MindlessConfig {
 
 @injectable()
 export class DefaultConfig implements MindlessConfig {
-    public dynamoEndpoint: string = "http://localhost:8008";
+    public dynamoEndpoint: string = "";
 }
