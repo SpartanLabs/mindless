@@ -2,4 +2,4 @@
 [![npm version](https://badge.fury.io/js/mindless-framework.svg)](https://badge.fury.io/js/mindless-framework)
 
 # mindless
-Library for creating APIs with TypeScript
+Library for creating APIs with TypeScript - Docs to come soon. Stay tuned!
