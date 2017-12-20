@@ -10,7 +10,7 @@ export class Dynamo {
 
     constructor( @inject(MINDLESS_SERVICE_INDENTIFIERS.MindlessConfig) private config: MindlessConfig) {
         let opts = {};
-        if (config.dynamoEndpoint.legnth != 0)
+        if (config.dynamoEndpoint.length != 0)
             opts = { endpoint: config.dynamoEndpoint }
 
         dyn.dynamoDriver(new dyn.AWS.DynamoDB(opts));
