@@ -105,5 +105,23 @@ public async getUser(request: Request): Promise<Response> {
 }
 ```
 
+## Dispatching the Controllers
+After configuring the request, routes, and the router for an application the next step is to dispatch the controller. This step is where mindless actually takes the request, finds the right controller, and executes the correct function on that controller. The response returned from the controller function can be returned from this step:
+```ts
+let router = new Router<Middleware, Controller, MindlessRoute>(request, container);
+router.route(routes);
+let res: Response = await router.dispatchController();
+```
+
 ## Responses
-Mindless provides a `Response` class that can be returned from controller functions. This object contains `statusCode`, `body`, and `headers` objects.
+Mindless provides a `Response` class that can be returned from controller functions. This object contains `statusCode`, `body`, and `headers` properties. Here's an example of creating a new `Response` object from a controller function:
+```ts
+public async test(): Promise<Response> {
+    return new Response(200, {test: "This is the body"}, {testHeader: "This is a test header"});
+}
+```
+In the future, there may be extensions for different integrations for mindless. For now, we will put service integration mappings into the `Response` class. A current example is for AWS Lambda. In your handler function, you can do the following to integrate with AWS Lambda's proxy integration:
+```ts
+let res: Response = await router.dispatchController();
+callback(null, res.toAWSLambdaIntegrationResponse());
+```
