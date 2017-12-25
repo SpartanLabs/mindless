@@ -1,0 +1,3 @@
+[submodule "sample-apps/aws-lambda"]
+	path = sample-apps/aws-lambda
+	url = http://github.com/SpartanLabs/mindless-aws-lambda-sample-app.git
