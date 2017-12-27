@@ -6,6 +6,9 @@
 
 Mindless allows developers to write typical controller-styled apis with models using TypeScript. An great use of the mindless framework is with applications built using the [serverless framework](https://serverless.com/). In a typical serverless application, each route goes to its own function. Using mindless allows the developer to flip the script on this paradigm. Using the lightweight routing mechanism, developers can use routes to point to controllers based on path. Mindless also enables parameter injection and general dependency injection in controllers. Mindless will also have extensions such as permissions and data access that will further empower developers.
 
+### [Sample App](https://github.com/SpartanLabs/mindless-aws-lambda-sample-app)
+A sample application is provided in the repository. This sample gives you an example of how to use the mindless framework to create a typescript api using AWS Lambda. 
+
 ## Router
 The mindless router is extremely lightweight and flexible.
 #### Defining your routes
