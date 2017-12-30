@@ -55,7 +55,8 @@ describe('Test request constructor', () => {
         defaultEvent.headers = null;
 
         let request = new Request(defaultEvent);
-        expect(() => { request.get('abc') }).toThrow(/key not found/);
+        expect(() => { request.getOrFail('abc') }).toThrow(/key not found/);
+        expect(request.get('abc')).toBe(undefined);
     });
 });
 
@@ -102,7 +103,7 @@ describe('Test request get method ', () => {
 
         let request = new Request(defaultEvent);
 
-        expect(() => { request.get('abc') }).toThrow(/key not found/);
+        expect(() => { request.getOrFail('abc') }).toThrow(/key not found/);
     });
 
     test('optional key not found returns undefined', () => {
@@ -113,7 +114,7 @@ describe('Test request get method ', () => {
 
         let request = new Request(defaultEvent);
 
-        let retrievedValue = request.get('abc', false);
+        let retrievedValue = request.get('abc');
 
         expect(retrievedValue).toBe(undefined);
     });
