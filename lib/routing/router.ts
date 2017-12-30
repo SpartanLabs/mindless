@@ -11,7 +11,7 @@ import { HttpMethods } from '../request/event';
 export class Router<M extends Middleware, C extends Controller, R extends Route<M, C>> {
 
   private middleware: GenericConstructor<M>[] = [];
-  private subjectRoute: R; 
+  private subjectRoute: R;
   private requestPath: string;
   private requestMethod: HttpMethods;
   private pathParams: {};
@@ -31,6 +31,11 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
       throw e; // could not find route, lets just throw for now.
     };
 
+    // add path params to request object
+    Object.keys(this.pathParams).forEach(param => {
+      this.request.add(param, this.pathParams[param]);
+    });
+
     this.addRouteMetaDataToRequest();
     this.addMiddlewareIfExists(this.subjectRoute.middleware);
   }
@@ -42,6 +47,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
     if (route) {
       return route;
     }
+
     throw Error("Could not find requested route.");
   }
 
@@ -86,8 +92,8 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
   public dispatchMiddleware(): Promise<any> {
     const promises: Promise<any>[] = this.middleware.map(constructor => this.container.resolve(constructor))
       .map(object => object.handle(this.request));
-    
-      return Promise.all(promises);
+
+    return Promise.all(promises);
   }
 
   public async dispatchController(): Promise<Response> {
@@ -96,7 +102,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
       let subjectController: C = this.container.resolve(this.subjectRoute.controller);
       const params = Router.getParameters(subjectController[this.subjectRoute.function]); // TODO: run all this on construction maybe.
       let args = params.map(this.getArgToInject);
-      
+
       let response: Response = await subjectController[this.subjectRoute.function](...args);
       return response;
     } catch (e) {
@@ -111,22 +117,23 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
   private static getParameters = (func) => {
     // match everything inside the function argument parens
     let args = func.toString().match(/\(([^)]*)\)/)[1];
-   
+
     return args.split(",")
-              .map(arg => arg.replace(/\/\*.*\*\//, "").trim()) // get rid of inline comments, trim whitespace
-              .filter(arg => arg); // dont add undefineds
+      .map(arg => arg.replace(/\/\*.*\*\//, "").trim()) // get rid of inline comments, trim whitespace
+      .filter(arg => arg); // dont add undefineds
   }
 
   private getArgToInject = (param) => {
     if (param == 'request') {
       return this.request;
-    } else if ('undefined' !== typeof this.pathParams[param]) {
-      return this.pathParams[param];
     }
 
-    const msg = "Unable to inject " + param + " into " + this.subjectRoute.controller.name 
-              + '.' + this.subjectRoute.function;
-
-    throw Error(msg);
+    try {
+      return this.request.getOrFail(param);
+    } catch (e) {
+      const msg = "Unable to inject " + param + " into " + this.subjectRoute.controller.name
+        + '.' + this.subjectRoute.function;
+      throw Error(msg);
+    }
   };
 }
