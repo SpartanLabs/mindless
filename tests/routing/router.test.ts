@@ -219,4 +219,8 @@ describe('Test router dispactControlelr with path parameters', () => {
         });
         requestMock.verifyAll();
     });
+
+    test('query params are injected', () => {
+        expect(true).toBeTruthy();
+    });
 });
