@@ -98,45 +98,29 @@ describe('Test router dispatchController method', () => {
 
 describe('Test router dispactControlelr with path parameters', () => {
 
-    let routes: MindlessRoute[] = [
-        {
-            url: new RouteUrl('/test1'),
-            method: HttpMethods.POST,
-            controller: TestController,
-            middleware: [],
-            function: "testWithPathParam"
-        },
-        {
-            url: new RouteUrl('/test1/:val'),
-            method: HttpMethods.POST,
-            controller: TestController,
-            middleware: [],
-            function: "testWithPathParam"
-        },
-        {
-            url: new RouteUrl('/test2/:val'),
-            method: HttpMethods.POST,
-            controller: TestController,
-            middleware: [],
-            function: "testWithRequestParam"
-        },
-        {
-            url: new RouteUrl('/test3/:val'),
-            method: HttpMethods.POST,
-            controller: TestController,
-            middleware: [],
-            function: "testWithRequestAndPathParam"
-        },
-    ];
 
-    const valParam = 'abc';
 
     test('path parameter get injected', async () => {
+
+        const routes: MindlessRoute[] = [
+            {
+                url: new RouteUrl('/test1/:val'),
+                method: HttpMethods.POST,
+                controller: TestController,
+                middleware: [],
+                function: "testWithPathParam"
+            }
+        ];
+
+        const valParam = 'abc';
+
         let requestMock = TypeMoq.Mock.ofType<Request>();
         let containerMock = TypeMoq.Mock.ofType<Container>();
 
-        requestMock.setup(c => c.getPath()).returns(() => '/test1/' + valParam);
-        requestMock.setup(c => c.getRequestMethod()).returns(() => HttpMethods.POST);
+        requestMock.setup(r => r.getPath()).returns(() => '/test1/' + valParam);
+        requestMock.setup(r => r.getRequestMethod()).returns(() => HttpMethods.POST);
+        requestMock.setup(r => r.getOrFail('val')).returns(() => valParam);
+        requestMock.setup(r => r.add('val', 'abc')).verifiable(TypeMoq.Times.once());
 
         let router = new Router<Middleware, Controller, Route<Middleware, Controller>>(requestMock.object, containerMock.object);
         router.route(routes);
@@ -147,9 +131,21 @@ describe('Test router dispactControlelr with path parameters', () => {
 
         expect(response.statusCode).toBe(200);
         expect(response.body.val).toBe(valParam);
+        requestMock.verifyAll();
     });
 
     test('request object get injected', async () => {
+        let routes: MindlessRoute[] = [
+            {
+                url: new RouteUrl('/test2/:val'),
+                method: HttpMethods.POST,
+                controller: TestController,
+                middleware: [],
+                function: "testWithRequestParam"
+            }
+        ];
+
+        const valParam = 'abc';
         const resource = '/test2/' + valParam;
 
         let requestMock = TypeMoq.Mock.ofType<Request>();
@@ -170,13 +166,24 @@ describe('Test router dispactControlelr with path parameters', () => {
     });
 
     test('request object and path param get injected', async () => {
-        const resource = '/test3/' + valParam;
+        let routes: MindlessRoute[] = [
+            {
+                url: new RouteUrl('/test3/:val'),
+                method: HttpMethods.POST,
+                controller: TestController,
+                middleware: [],
+                function: "testWithRequestAndPathParam"
+            },
+        ];
+        const valParam = 'abc'; const resource = '/test3/' + valParam;
 
         let requestMock = TypeMoq.Mock.ofType<Request>();
         let containerMock = TypeMoq.Mock.ofType<Container>();
 
         requestMock.setup(c => c.getPath()).returns(() => resource);
         requestMock.setup(c => c.getRequestMethod()).returns(() => HttpMethods.POST);
+        requestMock.setup(r => r.getOrFail('val')).returns(() => valParam);
+        requestMock.setup(r => r.add('val', 'abc')).verifiable(TypeMoq.Times.once());
 
         let router = new Router<Middleware, Controller, Route<Middleware, Controller>>(requestMock.object, containerMock.object);
         router.route(routes);
@@ -188,14 +195,27 @@ describe('Test router dispactControlelr with path parameters', () => {
         expect(response.statusCode).toBe(200);
         expect(response.body.resource).toBe(resource);
         expect(response.body.val).toBe(valParam);
+        requestMock.verifyAll();
     });
 
     test('throw error when cant find argument to inject into function', async () => {
+        let routes: MindlessRoute[] = [
+            {
+                url: new RouteUrl('/test1'),
+                method: HttpMethods.POST,
+                controller: TestController,
+                middleware: [],
+                function: "testWithPathParam"
+            },
+        ];
+        const valParam = 'abc';
         let requestMock = TypeMoq.Mock.ofType<Request>();
         let containerMock = TypeMoq.Mock.ofType<Container>();
 
         requestMock.setup(c => c.getPath()).returns(() => '/test1');
         requestMock.setup(c => c.getRequestMethod()).returns(() => HttpMethods.POST);
+        requestMock.setup(r => r.getOrFail('val')).returns(() => { throw Error() }).verifiable(TypeMoq.Times.once());
+        requestMock.setup(r => r.add('val', 'abc')).verifiable(TypeMoq.Times.never());
 
         let router = new Router<Middleware, Controller, Route<Middleware, Controller>>(requestMock.object, containerMock.object);
         router.route(routes);
@@ -209,5 +229,38 @@ describe('Test router dispactControlelr with path parameters', () => {
             'Error Message': 'Unable to inject val into TestController.testWithPathParam',
             'Mindless Message': 'Unable to resolve requested controller or method make sure your routes are configured properly'
         });
+        requestMock.verifyAll();
+    });
+
+    test('query params are injected', async () => {
+        let routes: MindlessRoute[] = [
+            {
+                url: new RouteUrl('/test1?val=:val'),
+                method: HttpMethods.POST,
+                controller: TestController,
+                middleware: [],
+                function: "testWithPathParam"
+            },
+        ];
+        const valParam = 'abc';
+        let requestMock = TypeMoq.Mock.ofType<Request>();
+        let containerMock = TypeMoq.Mock.ofType<Container>();
+
+        requestMock.setup(c => c.getPath()).returns(() => '/test1?val=' + valParam);
+        requestMock.setup(c => c.getRequestMethod()).returns(() => HttpMethods.POST);
+        requestMock.setup(r => r.getOrFail('val')).returns(() => valParam ).verifiable(TypeMoq.Times.once());
+        requestMock.setup(r => r.add('val', 'abc')).verifiable(TypeMoq.Times.once());
+
+        let router = new Router<Middleware, Controller, Route<Middleware, Controller>>(requestMock.object, containerMock.object);
+        router.route(routes);
+
+        containerMock.setup(c => c.resolve(TestController)).returns(() => new TestController());
+
+        let response = await router.dispatchController();
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body.val).toBe(valParam);
+
+        requestMock.verifyAll();
     });
 });

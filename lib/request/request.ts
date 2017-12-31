@@ -31,7 +31,16 @@ export class Request implements IRequest {
         return HttpMethods[this.event.httpMethod.toUpperCase()];
     }
 
-    get(key: string, failOnNotFound: boolean = true): any {
+    getOrFail(key: string): any {
+        const value = this.get(key);
+        if (value) {
+            return value;
+        }
+
+        throw Error("Invalid key: '" + key + "' , key not found in pathParameters, queryStringParameters, or Body parameters."); 
+    }
+
+    get(key: string): any {
 
         if ('undefined' !== typeof this.event.pathParameters[key]) {
             return this.event.pathParameters[key];
@@ -43,9 +52,6 @@ export class Request implements IRequest {
             return this._body[key];
         }
 
-        if (failOnNotFound) {
-            throw Error("Invalid key: '" + key + "' , key not found in pathParameters, queryStringParameters, or Body parameters.");
-        }
         return undefined;
     }
 
