@@ -1,5 +1,5 @@
 {
-    "name": "mindless-framework",
+    "name": "mindless",
     "version": "1.0.0-alpha.10",
     "description": "",
     "main": "dist/index.js",
