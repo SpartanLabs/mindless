@@ -73,8 +73,10 @@ export abstract class DynamoTable<T> {
                 if (err) {
                     console.error(`Error getting items on ${this.tableName} table. Err: ${err}`);
                     reject(err);
-                }
-                else {
+                } else if (item === undefined || item === null) {
+                    console.error(`No matching item found in ${this.tableName} table.`);
+                    reject("Model not found");
+                } else {
                     item = this.transformToModel(item);
                     resolve(item);
                 }
