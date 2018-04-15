@@ -76,6 +76,10 @@ export abstract class DynamoTable<TModel extends Model> {
                 if (err) {
                     console.error(`Error getting items on ${this.tableName} table. Err: ${err}`);
                     reject(err);
+                } else if (document === undefined || document === null) {
+                    const keyMsg = `HashKey: ${hashKey} ` + (rangeKey === undefined) ? "": `, RangeKey: ${rangeKey}`;
+                    console.error(`No item with ${keyMsg} found on ${this.tableName} table.`);
+                    reject("Model not found");
                 }
                 else {
                     const model = new this.TConstructor(document);
