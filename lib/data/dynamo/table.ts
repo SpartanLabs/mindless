@@ -22,7 +22,7 @@ export abstract class DynamoTable<TModel extends Model> {
         // this.dynamo.createTables();
     }
 
-    public create(data: Model, options: CreateItemOptions = {}): Promise<TModel> {
+    public create(data: TModel, options: CreateItemOptions = {}): Promise<TModel> {
         let promiseCallback = (resolve, reject) => {
             let createModelCallback: DynogelsItemCallback = (err, document) => {
                 if (err) {

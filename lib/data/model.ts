@@ -78,11 +78,15 @@ export interface ModelConstructor<T extends Model> {
     new (data: {[key: string]: any}): T;
 }
 
+export interface IModel {
+    model: { [key: string]: any};
+}
+
 /**
  * Currently you may only use the following types (as well as any compositions) for model properties
  *  number, string, boolean, array, object
  */
-export abstract class Model {
+export abstract class Model implements IModel {
 
     constructor(data: {[key: string]: any}) {
         Object.keys(data)
