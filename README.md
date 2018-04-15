@@ -4,7 +4,7 @@
 # mindless
 ### A Library for creating APIs with TypeScript. 
 
-Mindless allows developers to write typical controller-styled apis with models using TypeScript. An great use of the mindless framework is with applications built using the [serverless framework](https://serverless.com/). In a typical serverless application, each route goes to its own function. Using mindless allows the developer to flip the script on this paradigm. Using the lightweight routing mechanism, developers can use routes to point to controllers based on path. Mindless also enables parameter injection and general dependency injection in controllers. Mindless will also have extensions such as permissions and data access that will further empower developers.
+Mindless allows developers to write typical controller-styled apis with models using TypeScript. A great use of the mindless framework is with applications built using the [serverless framework](https://serverless.com/). In a typical serverless application, each route goes to its own function. Using mindless allows the developer to flip the script on this paradigm. Using the lightweight routing mechanism, developers can use routes to point to controllers based on path. Mindless also enables parameter injection and general dependency injection in controllers. Mindless will also have extensions such as permissions and data access that will further empower developers.
 
 ### [Sample App](https://github.com/SpartanLabs/mindless-aws-lambda-sample-app)
 A sample application is provided in the repository. This sample gives you an example of how to use the mindless framework to create a typescript api using AWS Lambda. 
@@ -53,7 +53,7 @@ The Route object is exteremly flexible, for example say we want to add functiona
 `Request.RouteMetaData.function`
 `etc`
 
-<i>Note: the controller and middleware elements will not be avialble in RouteMetaData. Why? Because if you need them your using this wrong.</i>
+<i>Note: the controller and middleware objects will not be avialble in RouteMetaData. Why? Because if you need them your using this wrong.</i>
 ```ts
 interface PermissionRoute<M extends Middleware, C extends Controller> extends Route<M, C> {
     permissions?: string[]
@@ -104,6 +104,14 @@ public async getUser(request: Request): Promise<Response> {
 
       let username = request.get('username'); //Retreives from either path parameters, query parameters, and then body.
 
+      return Response(200);
+}
+```
+
+We can also inject queryStringParameters, pathParameters, and bodyParameters directly into our controller methods.
+Say we have `username` passed in as a path parameters, we can then inject the `username` into our controller methods.
+```ts
+public async getUser(username: string): Promise<Response> {
       return Response(200);
 }
 ```
