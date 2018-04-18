@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import { MINDLESS_SERVICE_INDENTIFIERS } from '../lib/types';
 import { DefaultConfig, MindlessConfig } from '../lib/configs';
 import { registerProviders } from '../lib/providers';
-import { Container, injectable } from "inversify";
+import {Container, injectable} from "inversify";
 
 describe('registerProviders', () => {
 
