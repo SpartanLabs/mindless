@@ -4,10 +4,11 @@ import { injectable, inject } from 'inversify';
 import { Dynamo } from './dynamo';
 import { MINDLESS_SERVICE_INDENTIFIERS } from '../../types';
 import {Model, ModelConstructor} from "../model";
+import {ModelFactory} from "../model-factory";
 
 
 @injectable()
-export abstract class DynamoTable<TModel extends Model> {
+export abstract class DynamoTable<TModel extends Model> implements ModelFactory<TModel> {
     protected abstract tableName: string;
     protected abstract definition: ModelConfiguration;
     public dynModel: DynModel;
