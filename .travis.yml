@@ -2,7 +2,17 @@ language: node_js
 node_js:
 - '8'
 before_deploy:
-- npm run build
+- yarn build
+- rm -rf tests
+- rm -rf lib
+- rm -rf .*
+- rm index.ts
+- rm tslint.json
+- rm tsconfig.json
+- rm -rf node_modules
+
+
+
 deploy:
   provider: npm
   email: moraneva@msu.edu
