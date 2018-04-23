@@ -6,7 +6,7 @@ export interface ModelFactory<TModel> {
     getAllRaw(): Promise<any[]>;
     getItems(items: any[], options?: GetItemOptions): Promise<TModel[]>;
     get(hashKey: string, options?: GetItemOptions, rangeKey?: string): Promise<TModel>;
-    update(data: TModel, options?: UpdateItemOptions): Promise<boolean>;
-    updateRaw(data: { [key: string]: {} }, options: UpdateItemOptions): Promise<boolean>
-    delete(hashKey: string, rangeKey?: string, options?: DestroyItemOptions): Promise<boolean>
+    update(data: TModel, options?: UpdateItemOptions): Promise<void>;
+    updateRaw(data: { [key: string]: {} }, options: UpdateItemOptions): Promise<void>
+    delete(hashKey: string, rangeKey?: string, options?: DestroyItemOptions): Promise<void>
 }
