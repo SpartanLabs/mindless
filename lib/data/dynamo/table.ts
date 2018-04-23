@@ -118,7 +118,7 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
         return new Promise(promiseCallback);
     }
 
-    public update(data: TModel, options: UpdateItemOptions = {}): Promise<TModel> {
+    public update(data: TModel, options: UpdateItemOptions = {}): Promise<void> {
         let promiseCallback = (resolve, reject) => {
 
             let callback: DynogelsItemCallback = (err, document) => {
@@ -126,7 +126,7 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
                     console.error('Error updating item on ' + this.tableName + ' table. Err: ', err);
                     reject(err);
                 } else {
-                    resolve(data);
+                    resolve();
                 }
             };
 
@@ -135,7 +135,7 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
         return new Promise(promiseCallback);
     }
 
-    public delete(hashKey: string, rangeKey?: string, options: DestroyItemOptions = {}): Promise<TModel> {
+    public updateRaw(data: { [key: string]: {} }, options: UpdateItemOptions = {}): Promise<void> {
         let promiseCallback = (resolve, reject) => {
 
             let callback: DynogelsItemCallback = (err, item) => {
@@ -143,7 +143,25 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
                     console.error('Error updating item on ' + this.tableName + ' table. Err: ', err);
                     reject(err);
                 } else {
-                    resolve(true);
+                    resolve();
+                }
+            };
+
+            this.dynModel.update(data, options, callback);
+        };
+
+        return new Promise(promiseCallback);
+    }
+
+    public delete(hashKey: string, rangeKey?: string, options: DestroyItemOptions = {}): Promise<void> {
+        let promiseCallback = (resolve, reject) => {
+
+            let callback: DynogelsItemCallback = (err, item) => {
+                if (err) {
+                    console.error('Error deleting item on ' + this.tableName + ' table. Err: ', err);
+                    reject(err);
+                } else {
+                    resolve();
                 }
             };
 
