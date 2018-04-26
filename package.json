@@ -9,17 +9,24 @@
         "tests": "tests"
     },
     "devDependencies": {
+        "@types/dynogels": "^8.0.0",
         "@types/jest": "^21.1.6",
+        "@types/joi": "10.6.1",
         "@types/node": "^8.0.31",
+        "@types/route-parser": "^0.1.1",
         "jest": "^21.2.1",
         "ts-jest": "^21.2.3",
         "typemoq": "^2.0.1",
         "typescript": "^2.5.3"
     },
     "dependencies": {
-        "@types/dynogels": "^8.0.0",
-        "@types/joi": "10.6.1",
-        "@types/route-parser": "^0.1.1",
+        "dynogels": "^8.0.1",
+        "inversify": "^4.3.0",
+        "joi": "12.0.0",
+        "reflect-metadata": "^0.1.10",
+        "route-parser": "^0.0.5"
+    },
+    "peerDependencies": {
         "dynogels": "^8.0.1",
         "inversify": "^4.3.0",
         "joi": "12.0.0",
@@ -58,7 +65,7 @@
             "^.+\\.(ts)$": "./node_modules/ts-jest/preprocessor.js"
         },
         "testMatch": [
-            "**/tests/**/*.test.(ts|js)"
+            "**/tests/**/*.test.(ts)"
         ],
         "testEnvironment": "node",
         "mapCoverage": true
