@@ -6,7 +6,7 @@ before_deploy:
 - rm -rf tests
 - rm -rf lib
 - rm -rf .git
-- rm .gitignroe
+- rm .gitignore
 - rm .gitmodules
 - rm .travis.yml
 - rm index.ts
