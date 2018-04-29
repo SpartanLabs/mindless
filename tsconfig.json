@@ -11,7 +11,8 @@
         "noImplicitAny": false,
         "experimentalDecorators": true,
         "lib": ["es2015"],
-        "target": "es5"
+        "target": "es5",
+        "strictPropertyInitialization": false
     },
     "exclude": [
         "node_modules",
