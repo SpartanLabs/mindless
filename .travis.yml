@@ -5,7 +5,10 @@ before_deploy:
 - yarn build
 - rm -rf tests
 - rm -rf lib
-- rm -rf .*
+- rm -rf .git
+- rm .gitignroe
+- rm .gitmodules
+- rm .travis.yml
 - rm index.ts
 - rm tslint.json
 - rm tsconfig.json
