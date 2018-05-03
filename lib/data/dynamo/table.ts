@@ -11,12 +11,11 @@ import {ModelFactory} from "../model-factory";
 export abstract class DynamoTable<TModel extends Model> implements ModelFactory<TModel> {
     protected abstract tableName: string;
     protected abstract definition: ModelConfiguration;
+    protected abstract TConstructor: ModelConstructor<TModel>;
     public dynModel: DynModel;
 
-    constructor(
-        @inject(MINDLESS_SERVICE_INDENTIFIERS.Dynamo) private dynamo: Dynamo,
-        protected TConstructor: ModelConstructor<TModel>
-    ) { }
+
+    constructor(@inject(MINDLESS_SERVICE_INDENTIFIERS.Dynamo) private dynamo: Dynamo) { }
 
     protected registerTable() {
         this.dynModel = this.dynamo.addDefinition(this.tableName, this.definition);
@@ -42,7 +41,7 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
 
     public getAll(): Promise<TModel[]> {
         const documentMapper = (documents: Document[]) =>
-            documents.map(document => new this.TConstructor(document));
+            documents.map(document => new this.TConstructor(document.attrs));
         return this.getAllBase(documentMapper);
     }
 
@@ -59,7 +58,7 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
                     reject(err);
                 }
                 else {
-                    const models = documents.map(document => new this.TConstructor(document));
+                    const models = documents.map(document => new this.TConstructor(document.attrs));
                     resolve(models);
                 }
             };
@@ -83,7 +82,7 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
                     reject("Model not found");
                 }
                 else {
-                    const model = new this.TConstructor(document);
+                    const model = new this.TConstructor(document.attrs);
                     resolve(model);
                 }
             };
