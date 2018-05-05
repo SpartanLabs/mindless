@@ -77,6 +77,33 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
                     console.error(`Error getting items on ${this.tableName} table. Err: ${err}`);
                     reject(err);
                 } else if (document === undefined || document === null) {
+                    resolve(undefined);
+                }
+                else {
+                    const model = new this.TConstructor(document.attrs);
+                    resolve(model);
+                }
+            };
+
+            if (rangeKey == null) {
+                this.dynModel.get(hashKey, options, callback);
+            }
+            else {
+                this.dynModel.get(hashKey, rangeKey, options, callback);
+            }
+        };
+
+        return new Promise(promiseCallback);
+    }
+
+    public getOrFail(hashKey: string, options: GetItemOptions = {}, rangeKey?: string): Promise<TModel> {
+
+        let promiseCallback = (resolve, reject) => {
+            let callback = (err, document) => {
+                if (err) {
+                    console.error(`Error getting items on ${this.tableName} table. Err: ${err}`);
+                    reject(err);
+                } else if (document === undefined || document === null) {
                     const keyMsg = `HashKey: ${hashKey} ` + (rangeKey === undefined) ? "": `, RangeKey: ${rangeKey}`;
                     console.error(`No item with ${keyMsg} found on ${this.tableName} table.`);
                     reject("Model not found");

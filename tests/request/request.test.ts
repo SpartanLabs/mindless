@@ -26,8 +26,8 @@ describe('Test request constructor', () => {
 
     test('empty event', () => {
         let request = new Request(localEvent);
-        expect(request.getPath()).toBe("");
-        expect(request.getRequestMethod()).toBe(HttpMethods.GET);
+        expect(request.path).toBe("");
+        expect(request.method).toBe(HttpMethods.GET);
     });
 
     test('successfully parses json event body', () => {
@@ -40,7 +40,6 @@ describe('Test request constructor', () => {
         eventWithBody.body = JSON.stringify(body);
 
         let request = new Request(eventWithBody);
-
 
         expect(request.get('name')).toBe("zach");
         expect(request.get('number')).toBe(12345);
@@ -62,10 +61,10 @@ describe('Test request constructor', () => {
 
 describe('Test request get method ', () => {
     const localEvent = getEvent();
-    test('get path parameters', () => {
+    test('get added params', () => {
         let defaultEvent = Object.assign({}, localEvent);
-        defaultEvent.pathParameters['param'] = 'abc';
         let request = new Request(defaultEvent);
+        request.add('param', 'abc');
 
         let actualRetrievedValue = request.get('param');
 

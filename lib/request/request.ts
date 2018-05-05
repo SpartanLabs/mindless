@@ -4,6 +4,7 @@ import { IRequest } from './request-interface';
 
 export class Request implements IRequest {
     protected _body: { [key: string]: any };
+    protected data: { [key: string]: any } = {};
     public RouteMetaData: any;
 
     constructor(protected event: Event) {
@@ -23,11 +24,11 @@ export class Request implements IRequest {
         }
     }
 
-    getPath(): string {
+    get path(): string {
         return this.event.path;
     }
 
-    getRequestMethod(): HttpMethods {
+    get method(): HttpMethods {
         return HttpMethods[this.event.httpMethod.toUpperCase()];
     }
 
@@ -42,14 +43,14 @@ export class Request implements IRequest {
 
     get(key: string): any {
 
-        if ('undefined' !== typeof this.event.pathParameters[key]) {
-            return this.event.pathParameters[key];
+        if (typeof this.data[key] !== 'undefined') {
+            return this.data[key];
         }
-        if ('undefined' !== typeof this.event.queryStringParameters[key]) {
-            return this.event.queryStringParameters[key];
-        }
-        if ('undefined' !== typeof this._body[key]) {
+        if (typeof this._body[key] !== 'undefined') {
             return this._body[key];
+        }
+        if (typeof this.event.queryStringParameters[key] !== 'undefined') {
+            return this.event.queryStringParameters[key];
         }
 
         return undefined;
@@ -64,8 +65,8 @@ export class Request implements IRequest {
     }
 
     add(key: string, val: any, overwrite: boolean = false): void {
-        if (overwrite || 'undefined' === typeof this._body[key]) {
-            this._body[key] = val;
+        if (overwrite || 'undefined' === typeof this.data[key]) {
+            this.data[key] = val;
             return;
         }
 
