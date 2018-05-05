@@ -33,7 +33,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
 
     // add path params to request object
     Object.keys(this.pathParams).forEach(param => {
-      this.request.add(param, this.pathParams[param]);
+      this.request.add(param, this.pathParams[param],true);
     });
 
     this.addRouteMetaDataToRequest();
