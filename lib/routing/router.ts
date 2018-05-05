@@ -22,18 +22,18 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
   ) { }
 
   public route(routes: R[]): void {
-    this.requestPath = this.request.getPath()
-    this.requestMethod = this.request.getRequestMethod();
+    this.requestPath = this.request.path;
+    this.requestMethod = this.request.method;
 
     try {
       this.subjectRoute = this.getRequestRoute(routes);
     } catch (e) {
       throw e; // could not find route, lets just throw for now.
-    };
+    }
 
     // add path params to request object
     Object.keys(this.pathParams).forEach(param => {
-      this.request.add(param, this.pathParams[param]);
+      this.request.add(param, this.pathParams[param],true);
     });
 
     this.addRouteMetaDataToRequest();
@@ -76,7 +76,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
      * there should be no need for them outside of this router
      */
     for (let prop in this.subjectRoute) {
-      if ('undefined' !== typeof this.subjectRoute[prop] && prop != 'controller' && prop != 'middleware') {
+      if ('undefined' !== typeof this.subjectRoute[prop] && prop !== 'controller' && prop !== 'middleware') {
         narrowedRoute[prop] = this.subjectRoute[prop];
       }
     }
@@ -103,8 +103,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
       const params = Router.getParameters(subjectController[this.subjectRoute.function]); // TODO: run all this on construction maybe.
       let args = params.map(this.getArgToInject);
 
-      let response: Response = await subjectController[this.subjectRoute.function](...args);
-      return response;
+      return await subjectController[this.subjectRoute.function](...args);
     } catch (e) {
       let body = {
         'Error Message': e.message,
@@ -121,7 +120,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
     return args.split(",")
       .map(arg => arg.replace(/\/\*.*\*\//, "").trim()) // get rid of inline comments, trim whitespace
       .filter(arg => arg); // dont add undefineds
-  }
+  };
 
   private getArgToInject = (param) => {
     if (param == 'request') {

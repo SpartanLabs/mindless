@@ -69,6 +69,25 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
         return new Promise(promiseCallback);
     }
 
+    protected getAllBase(documentMapper: (x: any[]) => any): Promise<any[]> {
+        let promiseCallback = (resolve, reject) => {
+
+            let callback = (err, documentCollection: DocumentCollection) => {
+                if (err) {
+                    console.error('Error retrieving all models on ' + this.tableName + ' table. Err: ', err);
+                    reject(err);
+                } else {
+                    const models = documentMapper(documentCollection.Items);
+                    resolve(models);
+                }
+            };
+
+            this.dynModel.scan().loadAll().exec(callback);
+        };
+
+        return new Promise(promiseCallback);
+    }
+
     public get(hashKey: string, options: GetItemOptions = {}, rangeKey?: string): Promise<TModel> {
 
         let promiseCallback = (resolve, reject) => {
@@ -77,9 +96,7 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
                     console.error(`Error getting items on ${this.tableName} table. Err: ${err}`);
                     reject(err);
                 } else if (document === undefined || document === null) {
-                    const keyMsg = `HashKey: ${hashKey} ` + (rangeKey === undefined) ? "": `, RangeKey: ${rangeKey}`;
-                    console.error(`No item with ${keyMsg} found on ${this.tableName} table.`);
-                    reject("Model not found");
+                    resolve(undefined);
                 }
                 else {
                     const model = new this.TConstructor(document.attrs);
@@ -98,23 +115,16 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
         return new Promise(promiseCallback);
     }
 
-    protected getAllBase(documentMapper: (x: any[]) => any): Promise<any[]> {
-        let promiseCallback = (resolve, reject) => {
+    public getOrFail(hashKey: string, options: GetItemOptions = {}, rangeKey?: string): Promise<TModel> {
 
-            let callback = (err, documentCollection: DocumentCollection) => {
-                if (err) {
-                    console.error('Error retrieving all models on ' + this.tableName + ' table. Err: ', err);
-                    reject(err);
-                } else {
-                    const models = documentMapper(documentCollection.Items);
-                    resolve(models);
-                }
-            };
-
-            this.dynModel.scan().loadAll().exec(callback);
-        };
-
-        return new Promise(promiseCallback);
+        return this.get(hashKey, options, rangeKey).then((model) => {
+            if (model === undefined) {
+                const keyMsg = `HashKey: ${hashKey} ` + (rangeKey === undefined) ? "": `, RangeKey: ${rangeKey}`;
+                console.error(`No item with ${keyMsg} found on ${this.tableName} table.`);
+                return Promise.reject("Model not found");
+            }
+            return Promise.resolve(model);
+        })
     }
 
     public update(data: TModel, options: UpdateItemOptions = {}): Promise<void> {
