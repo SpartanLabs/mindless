@@ -247,7 +247,7 @@ describe('Test router dispactControlelr with path parameters', () => {
         requestMock.setup(c => c.path).returns(() => '/test1?val=' + valParam);
         requestMock.setup(c => c.method).returns(() => HttpMethods.POST);
         requestMock.setup(r => r.getOrFail('val')).returns(() => valParam ).verifiable(TypeMoq.Times.once());
-        requestMock.setup(r => r.add('val', 'abc')).verifiable(TypeMoq.Times.once());
+        requestMock.setup(r => r.add('val', 'abc', true)).verifiable(TypeMoq.Times.once());
 
         let router = new Router<Middleware, Controller, Route<Middleware, Controller>>(requestMock.object, containerMock.object);
         router.route(routes);
