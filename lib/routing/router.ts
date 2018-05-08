@@ -1,138 +1,76 @@
-import { Route } from './routes';
-import { Middleware } from '../middleware/middleware';
-import { Controller } from '../controller/controller';
-import { GenericConstructor } from '../interfaces';
-import { Request } from '../request/request';
-import { Response } from '../response';
-import { Container } from 'inversify';
-import { HttpMethods } from '../request/event';
+import {Route} from './routes';
+import {Middleware} from '../middleware/middleware';
+import {Controller} from '../controller/controller';
+import {Request} from '../request';
 
 
 export class Router<M extends Middleware, C extends Controller, R extends Route<M, C>> {
 
-  private middleware: GenericConstructor<M>[] = [];
-  private subjectRoute: R;
-  private requestPath: string;
-  private requestMethod: HttpMethods;
-  private pathParams: {};
+    /**
+     * Map that keeps a cache of the names of parameters each controller function requires
+     * `key` is of the form <controller-name>-<method-name>
+     * The value is an ordered array of required parameters for the method
+     */
+    protected methodParameterCache: {[key: string]: string[]} = {};
 
-  constructor(
-    private request: Request,
-    private container: Container
-  ) { }
 
-  public route(routes: R[]): void {
-    this.requestPath = this.request.path;
-    this.requestMethod = this.request.method;
-
-    try {
-      this.subjectRoute = this.getRequestRoute(routes);
-    } catch (e) {
-      throw e; // could not find route, lets just throw for now.
-    }
-
-    // add path params to request object
-    Object.keys(this.pathParams).forEach(param => {
-      this.request.add(param, this.pathParams[param],true);
-    });
-
-    this.addRouteMetaDataToRequest();
-    this.addMiddlewareIfExists(this.subjectRoute.middleware);
-  }
-
-  protected getRequestRoute(routes: R[]): R {
-
-    let route = routes.find(this.isRequestedRoute);
-
-    if (route) {
-      return route;
-    }
-
-    throw Error("Could not find requested route.");
-  }
-
-  private isRequestedRoute = (route) => {
-    if (route.method !== this.requestMethod) {
-      return false;
-    }
-    let params = route.url.match(this.requestPath);
-    if (params) {
-      this.pathParams = params;
-      return true;
-    }
-    return false;
-  };
-
-  /**
-   * May be useful to have access to the route data
-   * for extensions (Permissions/Gates wink wink)
-   */
-  private addRouteMetaDataToRequest() {
-
-    let narrowedRoute: any = {};
+    constructor(protected routes: R[]) { }
 
     /**
-     * controller and middleware are constructors 
-     * there should be no need for them outside of this router
+     *
+     * @param {Request} request
+     * @returns:
+     *  route: the target route object
+     *  params: the required parameters for the controller function in the route object
      */
-    for (let prop in this.subjectRoute) {
-      if ('undefined' !== typeof this.subjectRoute[prop] && prop !== 'controller' && prop !== 'middleware') {
-        narrowedRoute[prop] = this.subjectRoute[prop];
-      }
-    }
-    this.request.RouteMetaData = narrowedRoute;
-  }
+    public getRouteData(request: Request): {route: R, params: string[]} {
 
-  private addMiddlewareIfExists(middleware: GenericConstructor<M>[] | undefined): void {
-    if (middleware !== undefined) {
-      this.middleware = this.middleware.concat(middleware);
-    }
-  }
+        const route: R = this.getRequestedRoute(request);
 
-  public dispatchMiddleware(): Promise<any> {
-    const promises: Promise<any>[] = this.middleware.map(constructor => this.container.resolve(constructor))
-      .map(object => object.handle(this.request));
+        const params = this.getMethodParameters(route);
 
-    return Promise.all(promises);
-  }
-
-  public async dispatchController(): Promise<Response> {
-
-    try {
-      let subjectController: C = this.container.resolve(this.subjectRoute.controller);
-      const params = Router.getParameters(subjectController[this.subjectRoute.function]); // TODO: run all this on construction maybe.
-      let args = params.map(this.getArgToInject);
-
-      return await subjectController[this.subjectRoute.function](...args);
-    } catch (e) {
-      let body = {
-        'Error Message': e.message,
-        'Mindless Message': 'Unable to resolve requested controller or method make sure your routes are configured properly'
-      };
-      return new Response(500, body);
-    }
-  }
-
-  private static getParameters = (func) => {
-    // match everything inside the function argument parens
-    let args = func.toString().match(/\(([^)]*)\)/)[1];
-
-    return args.split(",")
-      .map(arg => arg.replace(/\/\*.*\*\//, "").trim()) // get rid of inline comments, trim whitespace
-      .filter(arg => arg); // dont add undefineds
-  };
-
-  private getArgToInject = (param) => {
-    if (param == 'request') {
-      return this.request;
+        return {route, params};
     }
 
-    try {
-      return this.request.getOrFail(param);
-    } catch (e) {
-      const msg = "Unable to inject " + param + " into " + this.subjectRoute.controller.name
-        + '.' + this.subjectRoute.function;
-      throw Error(msg);
+    protected getRequestedRoute(request: Request): R {
+
+        const isRequestedRoute = (route) => {
+            if (route.method !== request.method) {
+                return false;
+            }
+            let params = route.url.match(request.path);
+            if (params) {
+                request.addMultiple(params);
+                return true;
+            }
+            return false;
+        };
+
+        let route = this.routes.find(isRequestedRoute);
+
+        if (route) {
+            return route;
+        }
+
+        throw Error("Could not find requested route.");
     }
-  };
+
+    protected getMethodParameters(route: R) {
+        const key = `${route.controller.name}-${route.function}`;
+
+        if (this.methodParameterCache[key] === undefined) {
+            this.methodParameterCache[key] = Router.getParameters(route.controller.prototype[route.function]);
+        }
+
+        return this.methodParameterCache[key];
+    }
+
+    private static getParameters(func) {
+        // match everything inside the function argument parens
+        let args = func.toString().match(/\(([^)]*)\)/)[1];
+
+        return args.split(",")
+            .map(arg => arg.replace(/\/\*.*\*\//, "").trim()) // get rid of inline comments, trim whitespace
+            .filter(arg => arg); // dont add undefineds
+    }
 }

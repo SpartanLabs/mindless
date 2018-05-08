@@ -57,7 +57,7 @@ export class Request implements IRequest {
     }
 
     header(key: string): string {
-        if ('undefined' !== typeof this.event.headers[key]) {
+        if (typeof this.event.headers[key] !== 'undefined') {
             return this.event.headers[key];
         }
 
@@ -65,11 +65,15 @@ export class Request implements IRequest {
     }
 
     add(key: string, val: any, overwrite: boolean = false): void {
-        if (overwrite || 'undefined' === typeof this.data[key]) {
+        if (overwrite || typeof this.data[key] === 'undefined') {
             this.data[key] = val;
             return;
         }
 
         throw Error("The key '" + key + "' already exists, pass 'overwrite=true' or use a different key.")
+    }
+
+    addMultiple(data: {[key: string]: any}) {
+        Object.keys(data).forEach(key => this.add(key, data[key]));
     }
 }
