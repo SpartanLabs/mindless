@@ -32,7 +32,7 @@ export class Request implements IRequest {
         return HttpMethods[this.event.httpMethod.toUpperCase()];
     }
 
-    getOrFail(key: string): any {
+    public getOrFail(key: string): any {
         const value = this.get(key);
         if (value) {
             return value;
@@ -41,7 +41,7 @@ export class Request implements IRequest {
         throw Error("Invalid key: '" + key + "' , key not found in pathParameters, queryStringParameters, or Body parameters."); 
     }
 
-    get(key: string): any {
+    public get(key: string): any {
 
         if (typeof this.data[key] !== 'undefined') {
             return this.data[key];
@@ -56,7 +56,7 @@ export class Request implements IRequest {
         return undefined;
     }
 
-    header(key: string): string {
+    public header(key: string): string {
         if (typeof this.event.headers[key] !== 'undefined') {
             return this.event.headers[key];
         }
@@ -64,7 +64,7 @@ export class Request implements IRequest {
         throw Error("Invalid key: '" + key + "' , key not found in headers");
     }
 
-    add(key: string, val: any, overwrite: boolean = false): void {
+    public add(key: string, val: any, overwrite: boolean = false): void {
         if (overwrite || typeof this.data[key] === 'undefined') {
             this.data[key] = val;
             return;
@@ -73,7 +73,7 @@ export class Request implements IRequest {
         throw Error("The key '" + key + "' already exists, pass 'overwrite=true' or use a different key.")
     }
 
-    addMultiple(data: {[key: string]: any}) {
+    public addMultiple(data: {[key: string]: any}) {
         Object.keys(data).forEach(key => this.add(key, data[key]));
     }
 }
