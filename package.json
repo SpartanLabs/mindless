@@ -30,7 +30,7 @@
         "route-parser": "^0.0.5"
     },
     "scripts": {
-        "build": "rm -rf ./dist && tsc",
+        "build": "tsc",
         "test": "jest",
         "test-cover": "jest --coverage --collectCoverageFrom=!**/index.ts --collectCoverageFrom=lib/**/*.ts"
     },
