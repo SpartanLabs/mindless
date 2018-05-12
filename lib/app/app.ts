@@ -1,33 +1,34 @@
-import {Container} from "inversify";
 import {GenericConstructor} from "../interfaces";
-import {Middleware} from "../middleware/middleware";
-import {Controller} from "../controller/controller";
-import {Router, Route} from "../routing";
 import {Request} from "../request";
+import {Dispatcher} from "./dispatcher";
+import {Response} from "../response";
+import {IContainer} from "./IContainer";
+import {IRouter} from "../routing";
+import {IApp} from "./IApp";
 
-export interface IApp {
 
-}
+export class App implements IApp {
 
-class MindlessApp implements IApp {
-
-    protected container: Container;
-
-    constructor() {
-        this.container = new Container();
-    }
-
-    register(action) {
-        action(this.container);
+    constructor(protected container: IContainer, protected router: IRouter) {
     }
 
     resolve<T>(constructor: GenericConstructor<T>): T {
         return this.container.resolve(constructor);
     }
 
-    getRouter<M extends Middleware, C extends Controller, R extends Route<M, C>>(request: Request) {
-        return new Router<M, C, R>(request, this.container);
+    async handleRequest(request: Request): Promise<Response> {
+        // TODO: better response.
+        try {
+            const data = this.router.getRouteData(request);
+            const dispatcher = new Dispatcher(this.container, request, data);
+            await dispatcher.dispatchMiddleware();
+            return await dispatcher.dispatchController();
+        } catch (e) {
+            if (process.env.NODE_ENV === 'prod') {
+                console.log('error in MindlessApp.handleRequest: ', e);
+                return new Response(500, {error: 'failed to return a response'})
+            }
+            return new Response(500, e);
+        }
     }
 }
-
-export const App: IApp = new MindlessApp();

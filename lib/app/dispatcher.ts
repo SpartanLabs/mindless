@@ -2,8 +2,8 @@ import {Middleware} from "../middleware/middleware";
 import {Controller} from "../controller/controller";
 import {Route} from "../routing";
 import {Request} from "../request";
-import {Container} from "inversify";
 import {Response} from "../response";
+import {IContainer} from "./IContainer";
 
 export class Dispatcher {
 
@@ -11,7 +11,7 @@ export class Dispatcher {
     protected pathParameters: string[];
 
     constructor(
-        private container: Container,
+        private container: IContainer,
         protected request: Request,
         subject: {route: Route<Middleware, Controller>, params: string[]}
 
@@ -34,7 +34,7 @@ export class Dispatcher {
          * there should be no need for them outside of this router
          */
         for (let prop in this.subjectRoute) {
-            if ('undefined' !== typeof this.subjectRoute[prop] && prop !== 'controller' && prop !== 'middleware') {
+            if (typeof this.subjectRoute[prop] !== 'undefined' && prop !== 'controller' && prop !== 'middleware') {
                 narrowedRoute[prop] = this.subjectRoute[prop];
             }
         }
@@ -59,7 +59,7 @@ export class Dispatcher {
         } catch (e) {
             let body = {
                 'Error Message': e.message,
-                'Mindless Message': 'Unable to resolve requested controller or method make sure your routes are configured properly'
+                'Mindless Message': 'Unable to resolve requested controller or method make sure your _routes are configured properly'
             };
             return new Response(500, body);
         }

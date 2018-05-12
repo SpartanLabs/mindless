@@ -1,16 +1,16 @@
 import {HttpMethods, Request} from "../../lib/request";
 import * as TypeMoq from "typemoq";
-import {Container} from "inversify";
-import {Route, RouteUrl} from "../../lib/routing";
+import {RouteUrl} from "../../lib/routing";
 import {Middleware} from "../../lib/middleware/middleware";
 import {Controller} from "../../lib/controller/controller";
 import {Dispatcher} from "../../lib/app/dispatcher";
 import {GenericConstructor} from "../../lib/interfaces";
 import {Response} from "../../lib/response";
+import {IContainer} from "../../lib/app/IContainer";
 
 describe('Dispatcher construction', () => {
     const requestMock = TypeMoq.Mock.ofType<Request>();
-    const containerMock = TypeMoq.Mock.ofType<Container>();
+    const containerMock = TypeMoq.Mock.ofType<IContainer>();
     const constructorMock = TypeMoq.Mock.ofType<GenericConstructor<Controller>>();
     beforeEach(() => {
         requestMock.reset();
@@ -44,7 +44,7 @@ describe('Dispatcher construction', () => {
 
 describe('Dispatch middleware', () => {
     const requestMock = TypeMoq.Mock.ofType<Request>();
-    const containerMock = TypeMoq.Mock.ofType<Container>();
+    const containerMock = TypeMoq.Mock.ofType<IContainer>();
     const controllerConstructorMock = TypeMoq.Mock.ofType<GenericConstructor<Controller>>();
     const middlewareConstructorMock = TypeMoq.Mock.ofType<GenericConstructor<Middleware>>();
     const middlewareMock = TypeMoq.Mock.ofType<Middleware>();
@@ -95,7 +95,7 @@ describe('Dispatch middleware', () => {
 
 describe('Dispatch controller', () => {
     const requestMock = TypeMoq.Mock.ofType<Request>();
-    const containerMock = TypeMoq.Mock.ofType<Container>();
+    const containerMock = TypeMoq.Mock.ofType<IContainer>();
     const controllerConstructorMock = TypeMoq.Mock.ofType<GenericConstructor<Controller>>();
     const controllerMock = TypeMoq.Mock.ofType<Controller>();
 
@@ -135,6 +135,152 @@ describe('Dispatch controller', () => {
 
         expect(response).toBeInstanceOf(Response);
         expect(response.statusCode).toBe(200);
+
+        containerMock.verifyAll();
+        controllerMock.verifyAll();
+    });
+
+    test('dispatch controller successfully with parameters.', async () => {
+        const subject = {
+            route: {
+                url: new RouteUrl(''),
+                method: HttpMethods.GET,
+                controller: controllerConstructorMock.object,
+                function: 'test'
+            },
+            params: ['test', 'test2']
+        };
+
+        const dispatcher = new Dispatcher(containerMock.object, requestMock.object, subject);
+
+
+        // TODO: figure out how to verify the arguments of the function calls
+        // cannot get it to work with the mocks.
+        containerMock.setup(c => c.resolve(TypeMoq.It.isAny()))
+            .returns(() => controllerMock.object)
+            .verifiable(TypeMoq.Times.once());
+
+
+        requestMock.setup(r => r.getOrFail('test')).returns(() => 1).verifiable(TypeMoq.Times.once());
+        requestMock.setup(r => r.getOrFail('test2')).returns(() => 2).verifiable(TypeMoq.Times.once());
+
+        controllerMock.setup(m => (<any>m).test(1, 2))
+            .returns(() => Promise.resolve(new Response()))
+            .verifiable(TypeMoq.Times.once());
+
+
+        const response: Response = await dispatcher.dispatchController();
+
+        expect(response).toBeInstanceOf(Response);
+        expect(response.statusCode).toBe(200);
+
+        containerMock.verifyAll();
+        requestMock.verifyAll();
+        controllerMock.verifyAll();
+    });
+});
+
+describe('Dispatch controller fails', () => {
+    const requestMock = TypeMoq.Mock.ofType<Request>();
+    const containerMock = TypeMoq.Mock.ofType<IContainer>();
+    const controllerConstructorMock = TypeMoq.Mock.ofType<GenericConstructor<Controller>>();
+    const controllerMock = TypeMoq.Mock.ofType<Controller>();
+
+    beforeEach(() => {
+        requestMock.reset();
+        containerMock.reset();
+        controllerConstructorMock.reset();
+        controllerMock.reset();
+    });
+
+    test('dispatch controller, cannot resolve controller from container', async () => {
+        const subject = {
+            route: {
+                url: new RouteUrl(''),
+                method: HttpMethods.GET,
+                controller: controllerConstructorMock.object,
+                function: 'test'
+            },
+            params: []
+        };
+
+        const dispatcher = new Dispatcher(containerMock.object, requestMock.object, subject);
+
+        const errorMsg = 'could not resolve controller';
+
+        // TODO: figure out how to verify the arguments of the function calls
+        // cannot get it to work with the mocks.
+        containerMock.setup(c => c.resolve(TypeMoq.It.isAny()))
+            .throws(new Error(errorMsg))
+            .verifiable(TypeMoq.Times.once());
+
+        const response = await dispatcher.dispatchController();
+        
+        expect(response.statusCode).toBe(500);
+        expect(response.body['Error Message']).toBe(errorMsg);
+
+        containerMock.verifyAll();
+    });
+
+    test('dispatch controller, required function parameter not found.', async () => {
+        const subject = {
+            route: {
+                url: new RouteUrl(''),
+                method: HttpMethods.GET,
+                controller: controllerConstructorMock.object,
+                function: 'test'
+            },
+            params: ['test']
+        };
+
+        const dispatcher = new Dispatcher(containerMock.object, requestMock.object, subject);
+
+        // TODO: figure out how to verify the arguments of the function calls
+        // cannot get it to work with the mocks.
+        containerMock.setup(c => c.resolve(TypeMoq.It.isAny()))
+            .returns(() => controllerMock.object)
+            .verifiable(TypeMoq.Times.once());
+
+        requestMock.setup(r => r.getOrFail('test')).throws(new Error()).verifiable(TypeMoq.Times.once());
+
+        const response = await dispatcher.dispatchController();
+
+        expect(response.statusCode).toBe(500);
+        expect(response.body['Error Message']).toMatch(/Unable to inject test into/);
+
+        containerMock.verifyAll();
+        requestMock.verifyAll();
+    });
+
+    test('dispatch controller, controller method throws', async () => {
+        const subject = {
+            route: {
+                url: new RouteUrl(''),
+                method: HttpMethods.GET,
+                controller: controllerConstructorMock.object,
+                function: 'test'
+            },
+            params: []
+        };
+
+        const dispatcher = new Dispatcher(containerMock.object, requestMock.object, subject);
+
+        const errorMsg = 'controller method failed.';
+
+        // TODO: figure out how to verify the arguments of the function calls
+        // cannot get it to work with the mocks.
+        containerMock.setup(c => c.resolve(TypeMoq.It.isAny()))
+            .returns(() => controllerMock.object)
+            .verifiable(TypeMoq.Times.once());
+
+        controllerMock.setup(m => (<any>m).test())
+            .throws(new Error(errorMsg))
+            .verifiable(TypeMoq.Times.once());
+
+        const response = await dispatcher.dispatchController();
+
+        expect(response.statusCode).toBe(500);
+        expect(response.body['Error Message']).toBe(errorMsg);
 
         containerMock.verifyAll();
         controllerMock.verifyAll();

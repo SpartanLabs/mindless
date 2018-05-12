@@ -2,9 +2,10 @@ import {Route} from './routes';
 import {Middleware} from '../middleware/middleware';
 import {Controller} from '../controller/controller';
 import {Request} from '../request';
+import {IRouter} from "./IRouter";
 
 
-export class Router<M extends Middleware, C extends Controller, R extends Route<M, C>> {
+export class Router<M extends Middleware, C extends Controller, R extends Route<M, C>> implements IRouter {
 
     /**
      * Map that keeps a cache of the names of parameters each controller function requires
@@ -13,8 +14,11 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
      */
     protected methodParameterCache: {[key: string]: string[]} = {};
 
+    constructor(protected _routes: R[]) { }
 
-    constructor(protected routes: R[]) { }
+    get routes(): R[] {
+        return this._routes;
+    }
 
     /**
      *
@@ -46,7 +50,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
             return false;
         };
 
-        let route = this.routes.find(isRequestedRoute);
+        let route = this._routes.find(isRequestedRoute);
 
         if (route) {
             return route;
