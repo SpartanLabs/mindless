@@ -2,8 +2,8 @@ import 'reflect-metadata';
 import {HttpMethods, Request} from '../../src/request';
 import {Response} from '../../src/response';
 import {Router, MindlessRoute, RouteUrl} from '../../src/routing';
-import {Controller} from '../../mindless';
-import {Middleware} from '../../mindless';
+import {Controller} from '../..';
+import {Middleware} from '../..';
 
 import * as TypeMoq from 'typemoq';
 

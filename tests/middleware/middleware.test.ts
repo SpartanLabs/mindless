@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { Middleware } from '../../mindless';
+import { Middleware } from '../..';
 import { Request, Event } from '../../src/request';
 
 const getEvent = (): Event => {
