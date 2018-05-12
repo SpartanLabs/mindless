@@ -2,8 +2,8 @@
     "name": "mindless",
     "version": "1.0.0-beta.4",
     "description": "",
-    "main": "mindless.js",
-    "type": "mindless.d.ts",
+    "main": "index.js",
+    "type": "index.d.ts",
     "devDependencies": {
         "@types/dynogels": "^8.0.0",
         "@types/jest": "^21.1.6",

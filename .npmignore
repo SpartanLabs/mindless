@@ -1,6 +1,5 @@
 src/**/*.ts
 !src/**/*.d.ts
-mindless.ts
 package.sh
 tests
 coverage

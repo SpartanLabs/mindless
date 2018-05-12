@@ -14,6 +14,6 @@ package/
 src/**/*.js
 src/**/*.js.map
 src/**/*.d.ts
-mindless.js
-mindless.js.map
-mindless.d.ts
+index.js
+index.js.map
+index.d.ts
