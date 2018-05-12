@@ -1,7 +1,6 @@
-import { injectable } from 'inversify';
 import { Request } from '../request';
 
-@injectable()
+
 export abstract class Middleware {
   constructor() { }
 

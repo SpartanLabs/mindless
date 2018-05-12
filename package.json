@@ -36,7 +36,7 @@
     "scripts": {
         "build": "rm -rf ./dist && tsc",
         "test": "jest",
-        "test-cover": "jest --coverage"
+        "test-cover": "jest --coverage --collectCoverageFrom=!**/index.ts --collectCoverageFrom=lib/**/*.ts"
     },
     "repository": {
         "type": "git",

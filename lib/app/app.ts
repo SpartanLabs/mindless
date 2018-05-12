@@ -23,11 +23,12 @@ export class App implements IApp {
             await Dispatcher.dispatchMiddleware(this.container, request, data.route.middleware || []);
             return await Dispatcher.dispatchController(this.container, request, data.route, data.params);
         } catch (e) {
+            console.log('error in MindlessApp.handleRequest: ', e);
+            let message = e.message;
             if (process.env.NODE_ENV === 'prod') {
-                console.log('error in MindlessApp.handleRequest: ', e);
-                return new Response(500, {error: 'failed to return a response'})
+                message = 'failed to return a response';
             }
-            return new Response(500, e);
+            return new Response(500, {error: message});
         }
     }
 }

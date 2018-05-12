@@ -26,9 +26,7 @@ describe('Dispatch middleware', () => {
 
         const middleware = [middlewareConstructorMock.object];
 
-        // TODO: figure out how to verify the arguments of the function calls
-        // cannot get it to work with the mocks.
-        containerMock.setup(c => c.resolve(TypeMoq.It.isAny()))
+        containerMock.setup(c => c.resolve(middlewareConstructorMock.object))
             .returns(() => middlewareMock.object)
             .verifiable(TypeMoq.Times.once());
 
@@ -71,9 +69,7 @@ describe('Dispatch controller', () => {
 
         const params = [];
 
-        // TODO: figure out how to verify the arguments of the function calls
-        // cannot get it to work with the mocks.
-        containerMock.setup(c => c.resolve(TypeMoq.It.isAny()))
+        containerMock.setup(c => c.resolve(controllerConstructorMock.object))
             .returns(() => controllerMock.object)
             .verifiable(TypeMoq.Times.once());
 
@@ -100,9 +96,7 @@ describe('Dispatch controller', () => {
 
         const params = ['test', 'test2'];
 
-        // TODO: figure out how to verify the arguments of the function calls
-        // cannot get it to work with the mocks.
-        containerMock.setup(c => c.resolve(TypeMoq.It.isAny()))
+        containerMock.setup(c => c.resolve(controllerConstructorMock.object))
             .returns(() => controllerMock.object)
             .verifiable(TypeMoq.Times.once());
 
@@ -110,6 +104,34 @@ describe('Dispatch controller', () => {
         requestMock.setup(r => r.getOrFail('test2')).returns(() => 2).verifiable(TypeMoq.Times.once());
 
         controllerMock.setup(m => (<any>m).test(1, 2))
+            .returns(() => Promise.resolve(new Response()))
+            .verifiable(TypeMoq.Times.once());
+
+        const response: Response = await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
+
+        expect(response).toBeInstanceOf(Response);
+        expect(response.statusCode).toBe(200);
+
+        containerMock.verifyAll();
+        requestMock.verifyAll();
+        controllerMock.verifyAll();
+    });
+
+    test('dispatch controller successfully with request parameter.', async () => {
+        const route = {
+            url: new RouteUrl(''),
+            method: HttpMethods.GET,
+            controller: controllerConstructorMock.object,
+            function: 'test'
+        };
+
+        const params = ['request'];
+
+        containerMock.setup(c => c.resolve(controllerConstructorMock.object))
+            .returns(() => controllerMock.object)
+            .verifiable(TypeMoq.Times.once());
+
+        controllerMock.setup(m => (<any>m).test(requestMock.object))
             .returns(() => Promise.resolve(new Response()))
             .verifiable(TypeMoq.Times.once());
 
@@ -149,9 +171,7 @@ describe('Dispatch controller fails', () => {
 
         const errorMsg = 'could not resolve controller';
 
-        // TODO: figure out how to verify the arguments of the function calls
-        // cannot get it to work with the mocks.
-        containerMock.setup(c => c.resolve(TypeMoq.It.isAny()))
+        containerMock.setup(c => c.resolve(controllerConstructorMock.object))
             .throws(new Error(errorMsg))
             .verifiable(TypeMoq.Times.once());
 
@@ -173,9 +193,7 @@ describe('Dispatch controller fails', () => {
 
         const params = ['test'];
 
-        // TODO: figure out how to verify the arguments of the function calls
-        // cannot get it to work with the mocks.
-        containerMock.setup(c => c.resolve(TypeMoq.It.isAny()))
+        containerMock.setup(c => c.resolve(controllerConstructorMock.object))
             .returns(() => controllerMock.object)
             .verifiable(TypeMoq.Times.once());
 
@@ -202,9 +220,7 @@ describe('Dispatch controller fails', () => {
 
         const errorMsg = 'controller method failed.';
 
-        // TODO: figure out how to verify the arguments of the function calls
-        // cannot get it to work with the mocks.
-        containerMock.setup(c => c.resolve(TypeMoq.It.isAny()))
+        containerMock.setup(c => c.resolve(controllerConstructorMock.object))
             .returns(() => controllerMock.object)
             .verifiable(TypeMoq.Times.once());
 
