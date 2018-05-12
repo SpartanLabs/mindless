@@ -1,11 +1,11 @@
 import * as TypeMoq from "typemoq";
-import {HttpMethods, Request} from "../../lib/request";
-import {IRouter, RouteUrl} from "../../lib/routing";
-import {App, Dispatcher, IApp, IContainer} from "../../lib/app";
-import {GenericConstructor} from "../../lib/interfaces";
-import {Middleware} from "../../lib/middleware/middleware";
-import {Controller} from "../../lib/controller/controller";
-import {Response} from "../../lib/response";
+import {HttpMethods, Request} from "../../src/request";
+import {IRouter, RouteUrl} from "../../src/routing";
+import {App, Dispatcher, IApp, IContainer} from "../../src/app";
+import {GenericConstructor} from "../../src/interfaces";
+import {Middleware} from "../../src/middleware/middleware";
+import {Controller} from "../../src/controller/controller";
+import {Response} from "../../src/response";
 
 describe('App', () => {
     const containerMock = TypeMoq.Mock.ofType<IContainer>();

@@ -4,10 +4,6 @@
     "description": "",
     "main": "dist/mindless.js",
     "type": "./dist/mindless.d.ts",
-    "directories": {
-        "lib": "lib",
-        "tests": "tests"
-    },
     "devDependencies": {
         "@types/dynogels": "^8.0.0",
         "@types/jest": "^21.1.6",

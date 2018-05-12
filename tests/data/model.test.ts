@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import {IModel, Model} from "../../lib/data/model";
+import {IModel, Model} from "../../src/data/model";
 
 
 describe('Model maps simple properties', () => {

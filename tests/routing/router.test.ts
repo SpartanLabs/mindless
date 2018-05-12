@@ -1,7 +1,7 @@
 import 'reflect-metadata';
-import {HttpMethods, Request} from '../../lib/request';
-import {Response} from '../../lib/response';
-import {Router, MindlessRoute, RouteUrl} from '../../lib/routing';
+import {HttpMethods, Request} from '../../src/request';
+import {Response} from '../../src/response';
+import {Router, MindlessRoute, RouteUrl} from '../../src/routing';
 import {Controller} from '../..';
 import {Middleware} from '../..';
 
