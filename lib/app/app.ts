@@ -20,9 +20,8 @@ export class App implements IApp {
         // TODO: better response.
         try {
             const data = this.router.getRouteData(request);
-            const dispatcher = new Dispatcher(this.container, request, data);
-            await dispatcher.dispatchMiddleware();
-            return await dispatcher.dispatchController();
+            await Dispatcher.dispatchMiddleware(this.container, request, data.route.middleware || []);
+            return await Dispatcher.dispatchController(this.container, request, data.route, data.params);
         } catch (e) {
             if (process.env.NODE_ENV === 'prod') {
                 console.log('error in MindlessApp.handleRequest: ', e);

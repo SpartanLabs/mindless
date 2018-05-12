@@ -1,9 +1,9 @@
 import 'reflect-metadata';
-import { HttpMethods, Request } from '../../lib/request';
-import { Response } from '../../lib/response';
-import { Router, MindlessRoute, RouteUrl } from '../../lib/routing';
-import { Controller } from '../..';
-import { Middleware } from '../..';
+import {HttpMethods, Request} from '../../lib/request';
+import {Response} from '../../lib/response';
+import {Router, MindlessRoute, RouteUrl} from '../../lib/routing';
+import {Controller} from '../..';
+import {Middleware} from '../..';
 
 import * as TypeMoq from 'typemoq';
 
@@ -11,13 +11,16 @@ class TestController extends Controller {
     test(): Response {
         return new Response(200);
     }
-    // Note: Request parameter 
+
+    // Note: Request parameter
     testWithRequestParam(request: Request) {
-        return new Response(200, { resource: request.path });
+        return new Response(200, {resource: request.path});
     }
+
     testWithPathParam(val: string): Response {
-        return new Response(200, { val: val });
+        return new Response(200, {val: val});
     }
+
     testWithRequestAndPathParam(request: Request, val: string) {
         const res = {
             resource: request.path,
@@ -59,7 +62,9 @@ describe('Router getRequestRoute returns the correct route and parameters', () =
         requestMock.setup(c => c.path).returns(() => '/test');
         requestMock.setup(c => c.method).returns(() => HttpMethods.GET);
 
-        expect(() => { router.getRouteData(requestMock.object) }).toThrow("Could not find requested route.");
+        expect(() => {
+            router.getRouteData(requestMock.object)
+        }).toThrow("Could not find requested route.");
     });
 
     test('Throws error when route group undefined (path mismatch)', () => {
@@ -67,17 +72,29 @@ describe('Router getRequestRoute returns the correct route and parameters', () =
         requestMock.setup(c => c.path).returns(() => '/blah');
         requestMock.setup(c => c.method).returns(() => HttpMethods.POST);
 
-        expect(() => { router.getRouteData(requestMock.object) }).toThrow("Could not find requested route.");
+        expect(() => {
+            router.getRouteData(requestMock.object)
+        }).toThrow("Could not find requested route.");
     });
 
     test('Finds the correct route and returns the route object and no parameters', () => {
-        requestMock.setup(c => c.path).returns(() => '/test');
-        requestMock.setup(c => c.method).returns(() => HttpMethods.POST);
+
+        const expectedRouteMetadata = {
+            url: routes[0].url,
+            method: routes[0].method,
+            function: routes[0].function
+        };
+
+        requestMock.setup(c => c.path).returns(() => '/test').verifiable(TypeMoq.Times.once());
+        requestMock.setup(c => c.method).returns(() => HttpMethods.POST).verifiable(TypeMoq.Times.once());
+        requestMock.setup(r => r.RouteMetaData = TypeMoq.It.isValue(expectedRouteMetadata)).verifiable(TypeMoq.Times.once());
 
         const data = router.getRouteData(requestMock.object);
 
         expect(data.route).toEqual(routes[0]);
         expect(data.params.length).toEqual(0);
+
+        requestMock.verifyAll();
     });
 
     test('Finds the correct route and returns the route object with parameters', () => {
@@ -89,6 +106,11 @@ describe('Router getRequestRoute returns the correct route and parameters', () =
         expect(data.route).toEqual(routes[1]);
         expect(data.params.length).toEqual(1);
         expect(data.params[0]).toEqual('val');
+    });
+    
+    test('get routes', () => {
+       expect(router.routes).toHaveLength(2);
+       expect(router.routes).toEqual(routes);
     });
 });
 

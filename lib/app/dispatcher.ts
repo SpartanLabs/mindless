@@ -4,58 +4,47 @@ import {Route} from "../routing";
 import {Request} from "../request";
 import {Response} from "../response";
 import {IContainer} from "./IContainer";
+import {GenericConstructor} from "../interfaces";
 
 export class Dispatcher {
 
-    protected subjectRoute: Route<Middleware, Controller>;
-    protected pathParameters: string[];
-
-    constructor(
-        private container: IContainer,
-        protected request: Request,
-        subject: {route: Route<Middleware, Controller>, params: string[]}
-
-    ) {
-        this.subjectRoute = subject.route;
-        this.pathParameters = subject.params;
-        this.addRouteMetaDataToRequest();
-    }
-
-    /**
-     * May be useful to have access to the route data
-     * for extensions (Permissions/Gates wink wink)
-     */
-    private addRouteMetaDataToRequest() {
-
-        let narrowedRoute: any = {};
-
-        /**
-         * controller and middleware are constructors
-         * there should be no need for them outside of this router
-         */
-        for (let prop in this.subjectRoute) {
-            if (typeof this.subjectRoute[prop] !== 'undefined' && prop !== 'controller' && prop !== 'middleware') {
-                narrowedRoute[prop] = this.subjectRoute[prop];
-            }
-        }
-        this.request.RouteMetaData = narrowedRoute;
-    }
-
-    public dispatchMiddleware(): Promise<any[]> {
-        const middleware = this.subjectRoute.middleware || [];
-        const promises: Promise<any>[] = middleware.map(constructor => this.container.resolve(constructor))
-            .map(object => object.handle(this.request));
+    public static dispatchMiddleware(
+        container: IContainer,
+        request: Request,
+        middleware: GenericConstructor<Middleware>[]
+    ): Promise<any[]> {
+        const promises: Promise<any>[] = middleware.map(constructor => container.resolve(constructor))
+            .map(object => object.handle(request));
 
         return Promise.all(promises);
     }
 
-    public async dispatchController(): Promise<Response> {
+    public static async dispatchController(
+        container: IContainer,
+        request: Request,
+        route: Route<Middleware, Controller>,
+        params: string[]
+    ): Promise<Response> {
+
+        const getArgToInject = (param) => {
+            if (param == 'request') {
+                return request;
+            }
+
+            try {
+                return request.getOrFail(param);
+            } catch (e) {
+                const msg = "Unable to inject " + param + " into " + route.controller.name
+                    + '.' + route.function;
+                throw Error(msg);
+            }
+        };
 
         try {
-            let subjectController: Controller = this.container.resolve(this.subjectRoute.controller);
-            let args = this.pathParameters.map(this.getArgToInject);
+            let subjectController: Controller = container.resolve(route.controller);
+            let args = params.map(getArgToInject);
 
-            return await subjectController[this.subjectRoute.function](...args);
+            return await subjectController[route.function](...args);
         } catch (e) {
             let body = {
                 'Error Message': e.message,
@@ -64,18 +53,4 @@ export class Dispatcher {
             return new Response(500, body);
         }
     }
-
-    private getArgToInject = (param) => {
-        if (param == 'request') {
-            return this.request;
-        }
-
-        try {
-            return this.request.getOrFail(param);
-        } catch (e) {
-            const msg = "Unable to inject " + param + " into " + this.subjectRoute.controller.name
-                + '.' + this.subjectRoute.function;
-            throw Error(msg);
-        }
-    };
 }

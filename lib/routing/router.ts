@@ -12,9 +12,10 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
      * `key` is of the form <controller-name>-<method-name>
      * The value is an ordered array of required parameters for the method
      */
-    protected methodParameterCache: {[key: string]: string[]} = {};
+    protected methodParameterCache: { [key: string]: string[] } = {};
 
-    constructor(protected _routes: R[]) { }
+    constructor(protected _routes: R[]) {
+    }
 
     get routes(): R[] {
         return this._routes;
@@ -27,9 +28,11 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
      *  route: the target route object
      *  params: the required parameters for the controller function in the route object
      */
-    public getRouteData(request: Request): {route: R, params: string[]} {
+    public getRouteData(request: Request): { route: R, params: string[] } {
 
         const route: R = this.getRequestedRoute(request);
+
+        request.RouteMetaData = Router.getRouteMetaData(route);
 
         const params = this.getMethodParameters(route);
 
@@ -58,6 +61,22 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
 
         throw Error("Could not find requested route.");
     }
+
+    protected static getRouteMetaData(route: Route<Middleware, Controller>): {[key: string]: any} {
+
+        /**
+         * controller and middleware are constructors
+         * there should be no need for them
+         */
+        const isUsefulKey = key => typeof route[key] !== 'undefined' && key !== 'controller' && key !== 'middleware';
+
+        return Object.keys(route).filter(isUsefulKey)
+            .reduce((metaData, key) => {
+                metaData[key] = route[key];
+                return metaData;
+            }, {});
+    }
+
 
     protected getMethodParameters(route: R) {
         const key = `${route.controller.name}-${route.function}`;

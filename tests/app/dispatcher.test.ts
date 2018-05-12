@@ -3,44 +3,10 @@ import * as TypeMoq from "typemoq";
 import {RouteUrl} from "../../lib/routing";
 import {Middleware} from "../../lib/middleware/middleware";
 import {Controller} from "../../lib/controller/controller";
-import {Dispatcher} from "../../lib/app/dispatcher";
+import {Dispatcher, IContainer} from "../../lib/app";
 import {GenericConstructor} from "../../lib/interfaces";
 import {Response} from "../../lib/response";
-import {IContainer} from "../../lib/app/IContainer";
 
-describe('Dispatcher construction', () => {
-    const requestMock = TypeMoq.Mock.ofType<Request>();
-    const containerMock = TypeMoq.Mock.ofType<IContainer>();
-    const constructorMock = TypeMoq.Mock.ofType<GenericConstructor<Controller>>();
-    beforeEach(() => {
-        requestMock.reset();
-        containerMock.reset();
-        constructorMock.reset();
-    });
-
-    test('dispatcher get constructed and metadata gets added', () => {
-        const subject = {
-            route: {
-                url: new RouteUrl(''),
-                method: HttpMethods.GET,
-                controller: constructorMock.object,
-                function: 'test'
-            },
-            params: []
-        };
-
-        const expectedRouteMetadata = {
-            url: subject.route.url,
-            method: subject.route.method,
-            function: subject.route.function
-        };
-
-        const dispatcher = new Dispatcher(containerMock.object, requestMock.object, subject);
-
-        expect(dispatcher).toBeInstanceOf(Dispatcher);
-        requestMock.verify(r => r.RouteMetaData = TypeMoq.It.isValue(expectedRouteMetadata), TypeMoq.Times.once());
-    });
-});
 
 describe('Dispatch middleware', () => {
     const requestMock = TypeMoq.Mock.ofType<Request>();
@@ -57,19 +23,8 @@ describe('Dispatch middleware', () => {
     });
 
     test('Middleware is dispatched successfully', async () => {
-        const subject = {
-            route: {
-                url: new RouteUrl(''),
-                method: HttpMethods.GET,
-                controller: controllerConstructorMock.object,
-                function: 'test',
-                middleware: [middlewareConstructorMock.object]
-            },
-            params: []
-        };
 
-        const dispatcher = new Dispatcher(containerMock.object, requestMock.object, subject);
-
+        const middleware = [middlewareConstructorMock.object];
 
         // TODO: figure out how to verify the arguments of the function calls
         // cannot get it to work with the mocks.
@@ -82,7 +37,7 @@ describe('Dispatch middleware', () => {
             .verifiable(TypeMoq.Times.once());
 
 
-        const values = await dispatcher.dispatchMiddleware();
+        const values = await Dispatcher.dispatchMiddleware(containerMock.object, requestMock.object, middleware);
 
         expect(values).toHaveLength(1);
         expect(values[0]).toBe('done');
@@ -107,18 +62,14 @@ describe('Dispatch controller', () => {
     });
 
     test('dispatch controller successfully with no parameters.', async () => {
-        const subject = {
-            route: {
-                url: new RouteUrl(''),
-                method: HttpMethods.GET,
-                controller: controllerConstructorMock.object,
-                function: 'test'
-            },
-            params: []
+        const route = {
+            url: new RouteUrl(''),
+            method: HttpMethods.GET,
+            controller: controllerConstructorMock.object,
+            function: 'test'
         };
 
-        const dispatcher = new Dispatcher(containerMock.object, requestMock.object, subject);
-
+        const params = [];
 
         // TODO: figure out how to verify the arguments of the function calls
         // cannot get it to work with the mocks.
@@ -130,8 +81,7 @@ describe('Dispatch controller', () => {
             .returns(() => Promise.resolve(new Response()))
             .verifiable(TypeMoq.Times.once());
 
-
-        const response: Response = await dispatcher.dispatchController();
+        const response: Response = await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
 
         expect(response).toBeInstanceOf(Response);
         expect(response.statusCode).toBe(200);
@@ -141,25 +91,20 @@ describe('Dispatch controller', () => {
     });
 
     test('dispatch controller successfully with parameters.', async () => {
-        const subject = {
-            route: {
-                url: new RouteUrl(''),
-                method: HttpMethods.GET,
-                controller: controllerConstructorMock.object,
-                function: 'test'
-            },
-            params: ['test', 'test2']
+        const route = {
+            url: new RouteUrl(''),
+            method: HttpMethods.GET,
+            controller: controllerConstructorMock.object,
+            function: 'test'
         };
 
-        const dispatcher = new Dispatcher(containerMock.object, requestMock.object, subject);
-
+        const params = ['test', 'test2'];
 
         // TODO: figure out how to verify the arguments of the function calls
         // cannot get it to work with the mocks.
         containerMock.setup(c => c.resolve(TypeMoq.It.isAny()))
             .returns(() => controllerMock.object)
             .verifiable(TypeMoq.Times.once());
-
 
         requestMock.setup(r => r.getOrFail('test')).returns(() => 1).verifiable(TypeMoq.Times.once());
         requestMock.setup(r => r.getOrFail('test2')).returns(() => 2).verifiable(TypeMoq.Times.once());
@@ -168,8 +113,7 @@ describe('Dispatch controller', () => {
             .returns(() => Promise.resolve(new Response()))
             .verifiable(TypeMoq.Times.once());
 
-
-        const response: Response = await dispatcher.dispatchController();
+        const response: Response = await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
 
         expect(response).toBeInstanceOf(Response);
         expect(response.statusCode).toBe(200);
@@ -194,17 +138,14 @@ describe('Dispatch controller fails', () => {
     });
 
     test('dispatch controller, cannot resolve controller from container', async () => {
-        const subject = {
-            route: {
-                url: new RouteUrl(''),
-                method: HttpMethods.GET,
-                controller: controllerConstructorMock.object,
-                function: 'test'
-            },
-            params: []
+        const route = {
+            url: new RouteUrl(''),
+            method: HttpMethods.GET,
+            controller: controllerConstructorMock.object,
+            function: 'test'
         };
 
-        const dispatcher = new Dispatcher(containerMock.object, requestMock.object, subject);
+        const params = [];
 
         const errorMsg = 'could not resolve controller';
 
@@ -214,8 +155,8 @@ describe('Dispatch controller fails', () => {
             .throws(new Error(errorMsg))
             .verifiable(TypeMoq.Times.once());
 
-        const response = await dispatcher.dispatchController();
-        
+        const response: Response = await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
+
         expect(response.statusCode).toBe(500);
         expect(response.body['Error Message']).toBe(errorMsg);
 
@@ -223,17 +164,14 @@ describe('Dispatch controller fails', () => {
     });
 
     test('dispatch controller, required function parameter not found.', async () => {
-        const subject = {
-            route: {
-                url: new RouteUrl(''),
-                method: HttpMethods.GET,
-                controller: controllerConstructorMock.object,
-                function: 'test'
-            },
-            params: ['test']
+        const route = {
+            url: new RouteUrl(''),
+            method: HttpMethods.GET,
+            controller: controllerConstructorMock.object,
+            function: 'test'
         };
 
-        const dispatcher = new Dispatcher(containerMock.object, requestMock.object, subject);
+        const params = ['test'];
 
         // TODO: figure out how to verify the arguments of the function calls
         // cannot get it to work with the mocks.
@@ -243,7 +181,7 @@ describe('Dispatch controller fails', () => {
 
         requestMock.setup(r => r.getOrFail('test')).throws(new Error()).verifiable(TypeMoq.Times.once());
 
-        const response = await dispatcher.dispatchController();
+        const response: Response = await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
 
         expect(response.statusCode).toBe(500);
         expect(response.body['Error Message']).toMatch(/Unable to inject test into/);
@@ -253,17 +191,14 @@ describe('Dispatch controller fails', () => {
     });
 
     test('dispatch controller, controller method throws', async () => {
-        const subject = {
-            route: {
-                url: new RouteUrl(''),
-                method: HttpMethods.GET,
-                controller: controllerConstructorMock.object,
-                function: 'test'
-            },
-            params: []
+        const route = {
+            url: new RouteUrl(''),
+            method: HttpMethods.GET,
+            controller: controllerConstructorMock.object,
+            function: 'test'
         };
 
-        const dispatcher = new Dispatcher(containerMock.object, requestMock.object, subject);
+        const params = [];
 
         const errorMsg = 'controller method failed.';
 
@@ -277,7 +212,7 @@ describe('Dispatch controller fails', () => {
             .throws(new Error(errorMsg))
             .verifiable(TypeMoq.Times.once());
 
-        const response = await dispatcher.dispatchController();
+        const response: Response = await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
 
         expect(response.statusCode).toBe(500);
         expect(response.body['Error Message']).toBe(errorMsg);

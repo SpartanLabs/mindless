@@ -5,7 +5,7 @@ import { IRequest } from './request-interface';
 export class Request implements IRequest {
     protected _body: { [key: string]: any };
     protected data: { [key: string]: any } = {};
-    public RouteMetaData: any;
+    public RouteMetaData: {[key: string]: any} ;
 
     constructor(protected event: Event) {
         if (event.body == "" || event.body == null) {
