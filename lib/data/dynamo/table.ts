@@ -1,13 +1,18 @@
-import { DynogelsItemCallback, CreateItemOptions, Model as DynModel, ModelConfiguration, Document, DocumentCollection, UpdateItemOptions, DestroyItemOptions, GetItemOptions } from 'dynogels';
-import { injectable, inject } from 'inversify';
-
-import { Dynamo } from './dynamo';
-import { MINDLESS_SERVICE_INDENTIFIERS } from '../../types';
+import {
+    DynogelsItemCallback,
+    CreateItemOptions,
+    Model as DynModel,
+    ModelConfiguration,
+    Document,
+    DocumentCollection,
+    UpdateItemOptions,
+    DestroyItemOptions,
+    GetItemOptions,
+    define as defineTable
+} from 'dynogels';
 import {Model, ModelConstructor} from "../model";
 import {ModelFactory} from "../model-factory";
 
-
-@injectable()
 export abstract class DynamoTable<TModel extends Model> implements ModelFactory<TModel> {
     protected abstract tableName: string;
     protected abstract definition: ModelConfiguration;
@@ -15,11 +20,11 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
     public dynModel: DynModel;
 
 
-    constructor(@inject(MINDLESS_SERVICE_INDENTIFIERS.Dynamo) private dynamo: Dynamo) { }
+    constructor() {
+    }
 
     protected registerTable() {
-        this.dynModel = this.dynamo.addDefinition(this.tableName, this.definition);
-        // this.dynamo.createTables();
+        this.dynModel = defineTable(this.tableName, this.definition);
     }
 
     public create(data: TModel, options: CreateItemOptions = {}): Promise<TModel> {
@@ -119,7 +124,7 @@ export abstract class DynamoTable<TModel extends Model> implements ModelFactory<
 
         return this.get(hashKey, options, rangeKey).then((model) => {
             if (model === undefined) {
-                const keyMsg = `HashKey: ${hashKey} ` + (rangeKey === undefined) ? "": `, RangeKey: ${rangeKey}`;
+                const keyMsg = `HashKey: ${hashKey} ` + (rangeKey === undefined) ? "" : `, RangeKey: ${rangeKey}`;
                 console.error(`No item with ${keyMsg} found on ${this.tableName} table.`);
                 return Promise.reject("Model not found");
             }

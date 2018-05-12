@@ -5,7 +5,7 @@ import { IRequest } from './request-interface';
 export class Request implements IRequest {
     protected _body: { [key: string]: any };
     protected data: { [key: string]: any } = {};
-    public RouteMetaData: any;
+    public RouteMetaData: {[key: string]: any} ;
 
     constructor(protected event: Event) {
         if (event.body == "" || event.body == null) {
@@ -32,7 +32,7 @@ export class Request implements IRequest {
         return HttpMethods[this.event.httpMethod.toUpperCase()];
     }
 
-    getOrFail(key: string): any {
+    public getOrFail(key: string): any {
         const value = this.get(key);
         if (value) {
             return value;
@@ -41,7 +41,7 @@ export class Request implements IRequest {
         throw Error("Invalid key: '" + key + "' , key not found in pathParameters, queryStringParameters, or Body parameters."); 
     }
 
-    get(key: string): any {
+    public get(key: string): any {
 
         if (typeof this.data[key] !== 'undefined') {
             return this.data[key];
@@ -56,20 +56,24 @@ export class Request implements IRequest {
         return undefined;
     }
 
-    header(key: string): string {
-        if ('undefined' !== typeof this.event.headers[key]) {
+    public header(key: string): string {
+        if (typeof this.event.headers[key] !== 'undefined') {
             return this.event.headers[key];
         }
 
         throw Error("Invalid key: '" + key + "' , key not found in headers");
     }
 
-    add(key: string, val: any, overwrite: boolean = false): void {
-        if (overwrite || 'undefined' === typeof this.data[key]) {
+    public add(key: string, val: any, overwrite: boolean = false): void {
+        if (overwrite || typeof this.data[key] === 'undefined') {
             this.data[key] = val;
             return;
         }
 
         throw Error("The key '" + key + "' already exists, pass 'overwrite=true' or use a different key.")
+    }
+
+    public addMultiple(data: {[key: string]: any}) {
+        Object.keys(data).forEach(key => this.add(key, data[key]));
     }
 }
