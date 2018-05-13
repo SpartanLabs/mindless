@@ -1,0 +1,12 @@
+src/**/*.ts
+!src/**/*.d.ts
+package.sh
+tests
+coverage
+.gitignore
+.gitmodules
+.vscode
+.idea
+.travis.yml
+tslint.json
+tsconfig.json

@@ -3,7 +3,6 @@
     "compilerOptions": {
         "types": ["node"],
         "declaration": true,
-        "outDir": "./dist",
         "strict": true,
         "sourceMap": true,
         "preserveConstEnums": true,
@@ -12,7 +11,9 @@
         "experimentalDecorators": true,
         "lib": ["es2015"],
         "target": "es5",
-        "strictPropertyInitialization": false
+        "strictPropertyInitialization": false,
+        "module": "commonjs",
+        "moduleResolution": "node"
     },
     "exclude": [
         "node_modules",

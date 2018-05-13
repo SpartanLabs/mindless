@@ -1,9 +1,7 @@
 import 'reflect-metadata';
 
-import { EventEmitter } from 'events';
-import { Middleware } from '../../';
-import { Readable } from 'stream';
-import { Request, HttpMethods, Event } from '../../lib/request';
+import { Middleware } from '../..';
+import { Request, Event } from '../../src/request';
 
 const getEvent = (): Event => {
     return {

@@ -1,11 +1,11 @@
-import {HttpMethods, Request} from "../../lib/request";
+import {HttpMethods, Request} from "../../src/request";
 import * as TypeMoq from "typemoq";
-import {RouteUrl} from "../../lib/routing";
-import {Middleware} from "../../lib/middleware/middleware";
-import {Controller} from "../../lib/controller/controller";
-import {Dispatcher, IContainer} from "../../lib/app";
-import {GenericConstructor} from "../../lib/interfaces";
-import {Response} from "../../lib/response";
+import {RouteUrl} from "../../src/routing";
+import {Middleware} from "../../src/middleware/middleware";
+import {Controller} from "../../src/controller/controller";
+import {Dispatcher, IContainer} from "../../src/app";
+import {GenericConstructor} from "../../src/interfaces";
+import {Response} from "../../src/response";
 
 
 describe('Dispatch middleware', () => {

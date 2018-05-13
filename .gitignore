@@ -10,3 +10,10 @@ npm-debug.log
 .idea
 dist
 yarn-error.log
+package/
+src/**/*.js
+src/**/*.js.map
+src/**/*.d.ts
+index.js
+index.js.map
+index.d.ts
