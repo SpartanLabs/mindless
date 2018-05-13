@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import * as TypeMoq from "typemoq";
 import { define, ModelConfiguration, types, Model as DynModel } from "dynogels";
-import { DynamoTable, Model } from "../../..";
+import { DynamoTable, Model } from "../../../src/data";
 import * as joi from 'joi';
 import { It } from 'typemoq';
 
