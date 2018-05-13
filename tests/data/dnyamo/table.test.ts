@@ -85,7 +85,7 @@ describe('DynamoTable ', () => {
 
             const items = await testTable.getAllRaw();
 
-            expect(items).toBe(documentCollection.Items);
+            expect(items).toEqual(parsedDocumentCollection);
             dynogelsModelMock.verifyAll();
         });
 
@@ -346,6 +346,123 @@ describe('DynamoTable ', () => {
             const createdModel = await table.create(testModel);
 
             expect(createdModel).toBe(testModel);
+            dynogelsModelMock.verifyAll();
+        });
+    });
+
+    describe('getAll() with mappedKeys ', () => {
+        test('succeeds', async () => {
+            let table = new TestTableWithCalculatedKeys();
+            table.dynModel = dynogelsModelMock.object;
+
+            const testData = {
+                name: 'Evan', email: 'evan@gmail.com',
+                alternateName: 'Zeech', alternateEmail: 'zeech@gmail.com'
+            };
+
+            const dynamoRaw = {
+                Items: [{
+                    attrs: {
+                        test: 'Evan:evan@gmail.com', teste: 'Zeech:zeech@gmail.com'
+                    }
+                }]
+            };
+
+            dynogelsModelMock.setup(c => c.scan()).returns(() => {
+                return {
+                    loadAll: () => {
+                        return {
+                            exec: (callback) => {
+                                callback(undefined, dynamoRaw)
+                            }
+                        }
+                    }
+                } as any;
+            }).verifiable(TypeMoq.Times.once());
+
+            const models = await table.getAll();
+
+            expect(models[0]).toEqual(testData);
+            dynogelsModelMock.verifyAll();
+        });
+    });
+
+    describe('getItems() with mappedKeys ', () => {
+        test('succeeds', async () => {
+            let table = new TestTableWithCalculatedKeys();
+            table.dynModel = dynogelsModelMock.object;
+
+            const testData = {
+                name: 'Evan', email: 'evan@gmail.com',
+                alternateName: 'Zeech', alternateEmail: 'zeech@gmail.com'
+            };
+
+            const dynamoRaw = {
+                Items: [{
+                    attrs: {
+                        test: 'Evan:evan@gmail.com', teste: 'Zeech:zeech@gmail.com'
+                    }
+                }]
+            };
+
+            const itemsToGet = ['testKey1', 'testKey2', 'testKey3'];
+
+            dynogelsModelMock.setup(c => c.getItems(itemsToGet, {}, It.isAny()))
+                .callback((a, b, c) => c(undefined, dynamoRaw.Items)).verifiable(TypeMoq.Times.once());
+
+            const items = await table.getItems(itemsToGet);
+
+            expect(items[0]).toEqual(testData);
+            dynogelsModelMock.verifyAll();
+        });
+    });
+
+
+    describe('get() with mappedKeys ', () => {
+        test('succeeds', async () => {
+            let table = new TestTableWithCalculatedKeys();
+            table.dynModel = dynogelsModelMock.object;
+
+            const testData = {
+                name: 'Evan', email: 'evan@gmail.com',
+                alternateName: 'Zeech', alternateEmail: 'zeech@gmail.com'
+            };
+
+            const dynamoRaw = {
+                attrs: {
+                    test: 'Evan:evan@gmail.com', teste: 'Zeech:zeech@gmail.com'
+                }
+            };
+
+            dynogelsModelMock.setup(c => c.get(hashKey, {}, It.isAny()))
+                .callback((a, b, c) => c(undefined, dynamoRaw)).verifiable(TypeMoq.Times.once());
+
+            const item = await table.get(hashKey);
+
+            expect(item).toEqual(new TestModel(testData));
+            dynogelsModelMock.verifyAll();
+        });
+    });
+
+    describe('update() with mappedKeys ', () => {
+        test('succeeds', async () => {
+            let table = new TestTableWithCalculatedKeys();
+            table.dynModel = dynogelsModelMock.object;
+
+            const testData = new TestModel({
+                name: 'Evan', email: 'evan@gmail.com',
+                alternateName: 'Zeech', alternateEmail: 'zeech@gmail.com'
+            });
+
+            const dynamoRaw = {
+                test: 'Evan:evan@gmail.com', teste: 'Zeech:zeech@gmail.com'
+            };
+
+            dynogelsModelMock.setup(c => c.update(dynamoRaw, {}, It.isAny()))
+                .callback((a, b, c) => c(undefined, document)).verifiable(TypeMoq.Times.once());
+
+            await table.update(testData);
+
             dynogelsModelMock.verifyAll();
         });
     });
