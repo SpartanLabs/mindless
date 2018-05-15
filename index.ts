@@ -1,4 +1,4 @@
-export {App, IContainer, MindlessContainer, IApp} from "./src/app";
+export {App, IContainer, IApp} from "./src/app";
 export { DynamoTable, ModelFactory, Model } from './src/data';
 export { Router, Route, MindlessRoute, RouteUrl, IRouter } from './src/routing';
 export { Context } from './src/interfaces';

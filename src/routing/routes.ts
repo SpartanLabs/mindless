@@ -1,7 +1,7 @@
 import { GenericConstructor } from '../interfaces';
 import { Middleware } from '../middleware/middleware';
 import { Controller } from '../controller/controller';
-import { HttpMethods } from '../request/event';
+import { HttpMethods } from '../request';
 import * as RPRoute from 'route-parser';
 
 // don't want to tie user code to route-parser.

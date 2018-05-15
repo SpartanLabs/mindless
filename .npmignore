@@ -1,3 +1,5 @@
+src/**/*.ts
+!src/**/*.d.ts
 package.sh
 tests
 coverage
