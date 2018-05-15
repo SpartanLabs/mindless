@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import {HttpMethods, Request} from '../../src/request';
 import {Response} from '../../src/response';
 import {Router, MindlessRoute, RouteUrl} from '../../src/routing';
