@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/SpartanLabs/mindless.svg?branch=master)](https://travis-ci.org/SpartanLabs/mindless)
 [![npm version](https://badge.fury.io/js/mindless.svg)](https://badge.fury.io/js/mindless)
+[![Coverage Status](https://coveralls.io/repos/github/SpartanLabs/mindless/badge.svg?branch=master)](https://coveralls.io/github/SpartanLabs/mindless?branch=master)
 
 # mindless
 ### A Library for creating APIs with TypeScript. 
