@@ -5,7 +5,7 @@ node_js:
 script:
   - |
     if  [ "$TRAVIS_BRANCH" = "master" ]; then
-      yarn add dev
+      yarn add dev coveralls
       yarn test-travis
     else
       yarn test-cover
