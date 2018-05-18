@@ -27,7 +27,8 @@
     "scripts": {
         "build": "tsc",
         "test": "jest",
-        "test-cover": "jest --coverage --collectCoverageFrom=!**/index.ts --collectCoverageFrom=lib/**/*.ts"
+        "test-cover": "jest --coverage --collectCoverageFrom=!**/index.ts --collectCoverageFrom=lib/**/*.ts",
+        "test-travis": "test-cover -- --coverageReporters=text-lcov | coveralls"
     },
     "repository": {
         "type": "git",

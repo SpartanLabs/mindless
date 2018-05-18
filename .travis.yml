@@ -1,18 +1,14 @@
 language: node_js
 node_js:
 - '8'
+
+script:
+  - yarn add dev coveralls
+  - yarn test-travis
+
 before_deploy:
-- yarn build
-- rm -rf tests
-- rm -rf lib
-- rm -rf .git
-- rm .gitignore
-- rm .gitmodules
-- rm .travis.yml
-- rm index.ts
-- rm tslint.json
-- rm tsconfig.json
 - rm -rf node_modules
+- ./package
 
 deploy:
   provider: npm
