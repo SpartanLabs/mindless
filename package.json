@@ -1,6 +1,6 @@
 {
     "name": "mindless",
-    "version": "1.0.0-beta.6",
+    "version": "1.0.0-beta.9",
     "description": "",
     "main": "index.js",
     "type": "index.d.ts",
@@ -17,22 +17,18 @@
     },
     "dependencies": {
         "dynogels": "^8.0.1",
-        "inversify": "^4.13.0",
         "joi": "12.0.0",
-        "reflect-metadata": "^0.1.10",
         "route-parser": "^0.0.5"
     },
     "peerDependencies": {
         "dynogels": "^8.0.1",
-        "inversify": "^4.13.0",
-        "joi": "12.0.0",
-        "reflect-metadata": "^0.1.10",
-        "route-parser": "^0.0.5"
+        "joi": "12.0.0"
     },
     "scripts": {
         "build": "tsc",
         "test": "jest",
-        "test-cover": "jest --coverage --collectCoverageFrom=!**/index.ts --collectCoverageFrom=lib/**/*.ts"
+        "test-cover": "jest --coverage --collectCoverageFrom=!**/index.ts --collectCoverageFrom=lib/**/*.ts",
+        "test-travis": "jest --coverage && cat ./coverage/lcov.info | coveralls"
     },
     "repository": {
         "type": "git",

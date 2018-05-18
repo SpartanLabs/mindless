@@ -26,8 +26,6 @@
  The above will only work for simple types: number,boolean, string, arrays, and javascript objects.
  To support more advanced types we can add an optional parameter to ModelProperty that accepts a function to map the data stored in dynamo to that type.
 
- import "reflect-metadata";
-
  const ModelPropertyMetaDataKey = Symbol("DataMember");
 
 

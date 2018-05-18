@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { Middleware } from '../..';
 import { Request, Event } from '../../src/request';
 

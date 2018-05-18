@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { Event, HttpMethods, Request } from '../../src/request';
 
 import * as TypeMoq from 'typemoq';
