@@ -2,25 +2,14 @@ language: node_js
 node_js:
 - '8'
 
-jobs:
-  include:
-    - stage: Produce Coverage
-      node_js: node
-      script:
-        - yarn add dev coveralls
-        - yarn test-travis
-      if: branch = master
-
-jobs:
-  include:
-    - stage: Run unit tests
-      node_js: node
-      script: yarn test-cover
-      if: branch != master
-
-#script:
-#  - yarn add dev coveralls
-#  - yarn test-travis
+script:
+  - |
+    if  [ "$TRAVIS_BRANCH" = "master" ]; then
+      yarn add dev
+      yarn test-travis
+    else
+      yarn test-cover
+    fi
 
 before_deploy:
 - rm -rf node_modules
