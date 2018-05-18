@@ -13,11 +13,11 @@ class TestController extends Controller {
 
     // Note: Request parameter
     testWithRequestParam(request: Request) {
-        return new Response(200, {resource: request.path});
+        return new Response(200, { resource: request.path });
     }
 
     testWithPathParam(val: string): Response {
-        return new Response(200, {val: val});
+        return new Response(200, { val: val });
     }
 
     testWithRequestAndPathParam(request: Request, val: string) {
@@ -86,7 +86,8 @@ describe('Router getRequestRoute returns the correct route and parameters', () =
 
         requestMock.setup(c => c.path).returns(() => '/test').verifiable(TypeMoq.Times.once());
         requestMock.setup(c => c.method).returns(() => HttpMethods.POST).verifiable(TypeMoq.Times.once());
-        requestMock.setup(r => r.RouteMetaData = TypeMoq.It.isValue(expectedRouteMetadata)).verifiable(TypeMoq.Times.once());
+        requestMock.setup(r => r.RouteMetaData = TypeMoq.It.isValue(expectedRouteMetadata))
+            .verifiable(TypeMoq.Times.once());
 
         const data = router.getRouteData(requestMock.object);
 
@@ -106,10 +107,10 @@ describe('Router getRequestRoute returns the correct route and parameters', () =
         expect(data.params.length).toEqual(1);
         expect(data.params[0]).toEqual('val');
     });
-    
+
     test('get routes', () => {
-       expect(router.routes).toHaveLength(2);
-       expect(router.routes).toEqual(routes);
+        expect(router.routes).toHaveLength(2);
+        expect(router.routes).toEqual(routes);
     });
 });
 

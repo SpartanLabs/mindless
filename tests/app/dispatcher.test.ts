@@ -77,7 +77,8 @@ describe('Dispatch controller', () => {
             .returns(() => Promise.resolve(new Response()))
             .verifiable(TypeMoq.Times.once());
 
-        const response: Response = await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
+        const response: Response =
+            await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
 
         expect(response).toBeInstanceOf(Response);
         expect(response.statusCode).toBe(200);
@@ -107,7 +108,8 @@ describe('Dispatch controller', () => {
             .returns(() => Promise.resolve(new Response()))
             .verifiable(TypeMoq.Times.once());
 
-        const response: Response = await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
+        const response: Response =
+            await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
 
         expect(response).toBeInstanceOf(Response);
         expect(response.statusCode).toBe(200);
@@ -135,7 +137,8 @@ describe('Dispatch controller', () => {
             .returns(() => Promise.resolve(new Response()))
             .verifiable(TypeMoq.Times.once());
 
-        const response: Response = await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
+        const response: Response =
+            await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
 
         expect(response).toBeInstanceOf(Response);
         expect(response.statusCode).toBe(200);
@@ -175,7 +178,8 @@ describe('Dispatch controller fails', () => {
             .throws(new Error(errorMsg))
             .verifiable(TypeMoq.Times.once());
 
-        const response: Response = await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
+        const response: Response =
+            await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
 
         expect(response.statusCode).toBe(500);
         expect(response.body['Error Message']).toBe(errorMsg);
@@ -199,7 +203,8 @@ describe('Dispatch controller fails', () => {
 
         requestMock.setup(r => r.getOrFail('test')).throws(new Error()).verifiable(TypeMoq.Times.once());
 
-        const response: Response = await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
+        const response: Response =
+            await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
 
         expect(response.statusCode).toBe(500);
         expect(response.body['Error Message']).toMatch(/Unable to inject test into/);
@@ -228,7 +233,8 @@ describe('Dispatch controller fails', () => {
             .throws(new Error(errorMsg))
             .verifiable(TypeMoq.Times.once());
 
-        const response: Response = await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
+        const response: Response =
+            await Dispatcher.dispatchController(containerMock.object, requestMock.object, route, params);
 
         expect(response.statusCode).toBe(500);
         expect(response.body['Error Message']).toBe(errorMsg);
