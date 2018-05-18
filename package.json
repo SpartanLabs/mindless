@@ -29,7 +29,7 @@
     "scripts": {
         "build": "tsc",
         "test": "jest",
-        "test-cover": "jest --coverage --collectCoverageFrom=!**/index.ts --collectCoverageFrom=lib/**/*.ts",
+        "test-cover": "jest --coverage --collectCoverageFrom=!**/index.ts --collectCoverageFrom=src/**/*.ts",
         "test-travis": "jest --coverage && cat ./coverage/lcov.info | coveralls"
     },
     "repository": {
