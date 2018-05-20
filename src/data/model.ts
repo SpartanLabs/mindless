@@ -1,5 +1,3 @@
-import { object } from 'joi'
-
 export interface ModelConstructor<T extends Model> {
   new (data: { [key: string]: any }): T
 }
@@ -15,6 +13,13 @@ export interface IModel {
 export abstract class Model implements IModel {
   constructor(data: { [key: string]: any }) {
     Object.keys(data).forEach(prop => ((this as any)[prop] = data[prop]))
+  }
+
+  public static createModel<TModel extends Model>(
+    constructor: ModelConstructor<TModel>,
+    data: {}
+  ): TModel {
+    return Object.assign(new constructor({}), data)
   }
 
   get model(): { [key: string]: any } {

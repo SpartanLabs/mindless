@@ -52,7 +52,7 @@ export abstract class DynamoTable<TModel extends Model>
     const documentMapper = (documents: Document[]) =>
       documents
         .map(document => this.mapFromDynamoItem(document.attrs))
-        .map(document => new this.TConstructor(document))
+        .map(document => Model.createModel(this.TConstructor, document))
     return this.getAllBase(documentMapper)
   }
 
@@ -76,7 +76,7 @@ export abstract class DynamoTable<TModel extends Model>
         } else {
           const models = documents
             .map(document => this.mapFromDynamoItem(document.attrs))
-            .map(document => new this.TConstructor(document))
+            .map(document => Model.createModel(this.TConstructor, document))
 
           resolve(models)
         }
@@ -103,7 +103,8 @@ export abstract class DynamoTable<TModel extends Model>
         } else if (document === undefined || document === null) {
           resolve(undefined)
         } else {
-          const model = new this.TConstructor(
+          const model = Model.createModel(
+            this.TConstructor,
             this.mapFromDynamoItem((document as any).attrs)
           )
           resolve(model)

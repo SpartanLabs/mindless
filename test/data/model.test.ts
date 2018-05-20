@@ -14,7 +14,7 @@ describe('Model maps simple properties', () => {
       prop3: ['a', 'b', 'c']
     }
 
-    const myModel = new MyModel(data)
+    const myModel = Model.createModel(MyModel, data)
 
     expect(myModel.model).toEqual(data)
   })
@@ -53,7 +53,7 @@ describe('Model maps simple properties', () => {
       ]
     }
 
-    const myModel = new MyModel(data)
+    const myModel = Model.createModel(MyModel, data)
 
     expect(myModel.model).toEqual(data)
   })
@@ -79,7 +79,7 @@ describe('Model cannot map complex properties', () => {
     prop2: { prop1: 'my', prop2: 'class' }
   }
 
-  const myModel = new MyModel(data)
+  const myModel = Model.createModel(MyModel, data)
 
   test('#complex objects appear to be mapped properly', () => {
     expect(myModel.model).toEqual(data)
@@ -166,7 +166,7 @@ describe('Example of how to use the Model class', () => {
     accounts: ['abc123', 'def456']
   }
 
-  const myUser: IUser = new User(myUserData)
+  const myUser: IUser = Model.createModel(User, myUserData)
 
   test('#GetName works as expected', () => {
     expect(myUser.getName()).toBe(myUserData.name)
