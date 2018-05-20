@@ -1,3 +1,3 @@
 export interface GenericConstructor<T> {
-  new (...args: any[]): T;
+  new (...args: any[]): T
 }

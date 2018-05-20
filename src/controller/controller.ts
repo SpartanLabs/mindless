@@ -1,4 +1,1 @@
-export abstract class Controller {
-	constructor() {
-	}
-}
+export abstract class Controller {}
