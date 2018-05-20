@@ -3,9 +3,9 @@ import { IModel, Model } from '../../src/data/model'
 describe('Model maps simple properties', () => {
   test('#string, number, and array is properly mapped', () => {
     class MyModel extends Model {
-      public prop1: string
-      protected prop2: number
-      private prop3: string[]
+      public prop1: string = ''
+      protected prop2: number = 0
+      private prop3: string[] = []
     }
 
     const data = {
@@ -29,8 +29,8 @@ describe('Model maps simple properties', () => {
     }
 
     class MyModel extends Model {
-      public prop1: string
-      protected prop2: ComposedObject[]
+      public prop1: string = ''
+      protected prop2: ComposedObject[] = []
     }
 
     const data = {
@@ -61,8 +61,8 @@ describe('Model maps simple properties', () => {
 
 describe('Model cannot map complex properties', () => {
   class MyClass {
-    public prop1: string
-    private prop2: string
+    public prop1: string = ''
+    private prop2: string = ''
 
     getConcatenatedProperties() {
       return this.prop1 + this.prop2
@@ -70,8 +70,8 @@ describe('Model cannot map complex properties', () => {
   }
 
   class MyModel extends Model {
-    public prop1: Map<string, boolean>
-    public prop2: MyClass
+    public prop1: Map<string, boolean> = new Map()
+    public prop2: MyClass = new MyClass()
   }
 
   const data = {
@@ -95,11 +95,11 @@ describe('Model cannot map complex properties', () => {
 
 describe('Example of how to use the Model class', () => {
   /**
-     * We can optionally create an interface to define
-     * the shape of the data we pass to our constructor.
-     * We should include all properties we want to be included
-     * on our model.
-     */
+   * We can optionally create an interface to define
+   * the shape of the data we pass to our constructor.
+   * We should include all properties we want to be included
+   * on our model.
+   */
   interface IUserData {
     name: string
     age: number
@@ -107,47 +107,50 @@ describe('Example of how to use the Model class', () => {
   }
 
   /**
-     * We can also optionally define an interface for our User class.
-     * It should extend IModel.
-     */
+   * We can also optionally define an interface for our User class.
+   * It should extend IModel.
+   */
   interface IUser extends IModel {
     age: number
+
     getName(): string
+
     retrieveAccount(accountIdx: number): string
   }
 
   /**
-     * Are User class will implement the IUser interface
-     * and NOT the IUserData interface because we want
-     * to be able reference all necessary methods when
-     * using the IUser interface. Where as the IUserData
-     * interface is simply for ensuring we pass in the correct
-     * data to our User Model constructor.
-     */
+   * Are User class will implement the IUser interface
+   * and NOT the IUserData interface because we want
+   * to be able reference all necessary methods when
+   * using the IUser interface. Where as the IUserData
+   * interface is simply for ensuring we pass in the correct
+   * data to our User Model constructor.
+   */
   class User extends Model implements IUser {
     /**
-         * Out properties can have any visibility you choose
-         */
-    public age: number
-    protected name: string
-    private accounts: string[]
+     * Out properties can have any visibility you choose
+     */
+    public age: number = 0
+    protected name: string = ''
+    private accounts: string[] = []
 
     /**
-         * This will help by ensuring all necessary data is passed through
-         * when creating instances of User.
-         * @param {IUserData} data
-         */
+     * This will help by ensuring all necessary data is passed through
+     * when creating instances of User.
+     * @param {IUserData} data
+     */
     constructor(data: IUserData) {
       super(data)
     }
 
     /**
-         * We can define additional methods as we like
-         */
+     * We can define additional methods as we like
+     */
 
     public getName() {
       return this.name
     }
+
     public retrieveAccount(accountIdx: number) {
       if (accountIdx >= this.accounts.length) {
         throw new RangeError('Account Index out of range')
