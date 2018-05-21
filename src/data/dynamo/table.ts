@@ -29,9 +29,10 @@ export abstract class DynamoTable<TModel extends Model>
     if (key === undefined) {
       return []
     }
-    const regex = /{([^}]+)}/gi
+    const regex = new RegExp(/{([^}]+)}/gi)
     let match = regex.exec(key)
     const matches: string[] = []
+
     while (match != null) {
       if (match.index === regex.lastIndex) {
         regex.lastIndex++
@@ -39,6 +40,7 @@ export abstract class DynamoTable<TModel extends Model>
       matches.push(match[1])
       match = regex.exec(key)
     }
+
     return matches
   }
 
@@ -47,12 +49,14 @@ export abstract class DynamoTable<TModel extends Model>
     options: CreateItemOptions = {}
   ): Promise<TModel> {
     const mappedItem = this.mapToDynamoItem(data.model)
+
     let promiseCallback = (resolve: Function, reject: Function) => {
-      let createModelCallback: DynogelsItemCallback = (err, document) => {
+      let createModelCallback: DynogelsItemCallback = err => {
         if (err) {
           console.error(
-            `Failed to create item on ${this.tableName}
-                     table.\n Item: ${JSON.stringify(data.model)}\n Err: `,
+            `Failed to create item on ${this.tableName} table.
+              \n Item: ${JSON.stringify(data.model)}
+              \n Err: `,
             err
           )
           reject(err)
@@ -72,6 +76,7 @@ export abstract class DynamoTable<TModel extends Model>
       documents
         .map(document => this.mapFromDynamoItem(document.attrs))
         .map(document => Model.createModel(this.TConstructor, document))
+
     return this.getAllBase(documentMapper)
   }
 
@@ -151,6 +156,7 @@ export abstract class DynamoTable<TModel extends Model>
           `HashKey: ${hashKey} ` + (rangeKey === undefined)
             ? ''
             : `, RangeKey: ${rangeKey}`
+
         console.error(
           `No item with ${keyMsg} found on ${this.tableName} table.`
         )
@@ -194,7 +200,7 @@ export abstract class DynamoTable<TModel extends Model>
     options: DestroyItemOptions = {}
   ): Promise<void> {
     let promiseCallback = (resolve: Function, reject: Function) => {
-      let callback: DynogelsItemCallback = (err, item) => {
+      let callback: DynogelsItemCallback = err => {
         if (err) {
           console.error(
             'Error deleting item on ' + this.tableName + ' table. Err: ',
@@ -263,20 +269,16 @@ export abstract class DynamoTable<TModel extends Model>
     const fieldsToRemove: string[] = []
 
     if (this.partitionKeyValue !== undefined) {
-      const partitionKeyMatches = this.partitionKeyReplacables
-      Array.prototype.push.apply(fieldsToRemove, partitionKeyMatches)
-
-      data[this.definition.hashKey] = partitionKeyMatches.reduce(
+      Array.prototype.push.apply(fieldsToRemove, this.partitionKeyReplacables)
+      data[this.definition.hashKey] = this.partitionKeyReplacables.reduce(
         keyReplacementReducer,
         this.partitionKeyValue
       )
     }
 
     if (this.rangeKeyValue !== undefined && this.definition.rangeKey) {
-      const rangeKeyMatches = this.rangeKeyReplacables
-      Array.prototype.push.apply(fieldsToRemove, rangeKeyMatches)
-
-      data[this.definition.rangeKey] = rangeKeyMatches.reduce(
+      Array.prototype.push.apply(fieldsToRemove, this.rangeKeyReplacables)
+      data[this.definition.rangeKey] = this.rangeKeyReplacables.reduce(
         keyReplacementReducer,
         this.rangeKeyValue
       )
@@ -287,35 +289,33 @@ export abstract class DynamoTable<TModel extends Model>
     return data
   }
 
-  private mapFromDynamoItem = (data: { [key: string]: any }) => {
+  private mapFromDynamoItem(data: { [key: string]: any }) {
     if (this.partitionKeyValue !== undefined) {
       const hashKey = data[this.definition.hashKey]
-      const partitionKeyMatches = this.partitionKeyReplacables
       const replacementValues = DynamoTable.getKeyMatches(hashKey)
 
-      if (partitionKeyMatches.length !== replacementValues.length) {
+      if (this.partitionKeyReplacables.length !== replacementValues.length) {
         throw new Error('shit is fucked')
       }
 
-      partitionKeyMatches.forEach((match, idx) => {
-        data[match] = replacementValues[idx]
-      })
+      this.partitionKeyReplacables.forEach(
+        (match, idx) => (data[match] = replacementValues[idx])
+      )
 
       delete data[this.definition.hashKey]
     }
 
     if (this.rangeKeyValue !== undefined && this.definition.rangeKey) {
       const rangeKey = data[this.definition.rangeKey]
-      const rangeKeyMatches = this.partitionKeyReplacables
       const replacementValues = DynamoTable.getKeyMatches(rangeKey)
 
-      if (rangeKeyMatches.length !== replacementValues.length) {
+      if (this.rangeKeyReplacables.length !== replacementValues.length) {
         throw new Error('shit is fucked')
       }
 
-      rangeKeyMatches.forEach((match, idx) => {
-        data[match] = replacementValues[idx]
-      })
+      this.rangeKeyReplacables.forEach(
+        (match, idx) => (data[match] = replacementValues[idx])
+      )
 
       delete data[this.definition.hashKey]
     }
