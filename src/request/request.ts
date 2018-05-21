@@ -38,9 +38,7 @@ export class Request implements IRequest {
     }
 
     throw Error(
-      "Invalid key: '" +
-        key +
-        "' , key not found in pathParameters, queryStringParameters, or Body parameters."
+      `Invalid key: '${key}', key not found in pathParameters, queryStringParameters, or Body parameters.`
     )
   }
 
@@ -63,7 +61,7 @@ export class Request implements IRequest {
       return this.event.headers[key]
     }
 
-    throw Error("Invalid key: '" + key + "' , key not found in headers")
+    throw Error(`Invalid key: '${key}', key not found in headers`)
   }
 
   public add(key: string, val: any, overwrite: boolean = false): void {
@@ -73,9 +71,7 @@ export class Request implements IRequest {
     }
 
     throw Error(
-      "The key '" +
-        key +
-        "' already exists, pass 'overwrite=true' or use a different key."
+      `The key '${key}' already exists, pass 'overwrite=true' or use a different key.`
     )
   }
 
