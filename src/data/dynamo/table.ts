@@ -22,6 +22,25 @@ export abstract class DynamoTable<TModel extends Model>
   protected abstract TConstructor: ModelConstructor<TModel>
   protected partitionKeyValue?: string
   protected rangeKeyValue?: string
+  private _partitionKeyReplacables?: string[]
+  private _rangeKeyReplacables?: string[]
+
+  private static getKeyMatches(key: string | undefined): string[] {
+    if (key === undefined) {
+      return []
+    }
+    const regex = /{([^}]+)}/gi
+    let match = regex.exec(key)
+    const matches: string[] = []
+    while (match != null) {
+      if (match.index === regex.lastIndex) {
+        regex.lastIndex++
+      }
+      matches.push(match[1])
+      match = regex.exec(key)
+    }
+    return matches
+  }
 
   public create(
     data: TModel,
@@ -225,103 +244,80 @@ export abstract class DynamoTable<TModel extends Model>
     return new Promise(promiseCallback)
   }
 
-  private mapToDynamoItem = (data: { [key: string]: any }) => {
-    if (
-      this.partitionKeyValue === undefined &&
-      this.rangeKeyValue === undefined
-    ) {
-      return data
-    }
+  protected get partitionKeyReplacables() {
+    return (this._partitionKeyReplacables =
+      this._partitionKeyReplacables ||
+      DynamoTable.getKeyMatches(this.partitionKeyValue))
+  }
 
-    const fieldsToRemove = new Set<string>()
+  protected get rangeKeyReplacables() {
+    return (this._rangeKeyReplacables =
+      this._rangeKeyReplacables ||
+      DynamoTable.getKeyMatches(this.rangeKeyValue))
+  }
+
+  private mapToDynamoItem(data: { [key: string]: any }) {
+    const keyReplacementReducer = (outStr: string, field: string) =>
+      outStr.replace(`${field}`, data[field])
+
+    const fieldsToRemove: string[] = []
 
     if (this.partitionKeyValue !== undefined) {
-      let value = this.partitionKeyValue
-      const curlyBracketRegex = new RegExp(/{([^}]+)}/gi)
-      const partitionKeyMatches = value.match(
-        curlyBracketRegex
-      ) as RegExpMatchArray
-      partitionKeyMatches.forEach(match => {
-        const field = match.substring(1, match.length - 1)
-        fieldsToRemove.add(field)
-        value = value.replace(match, data[field])
-      })
-      data[this.definition.hashKey] = value
+      const partitionKeyMatches = this.partitionKeyReplacables
+      Array.prototype.push.apply(fieldsToRemove, partitionKeyMatches)
+
+      data[this.definition.hashKey] = partitionKeyMatches.reduce(
+        keyReplacementReducer,
+        this.partitionKeyValue
+      )
     }
 
     if (this.rangeKeyValue !== undefined && this.definition.rangeKey) {
-      let value = this.rangeKeyValue
-      const curlyBracketRegex = new RegExp(/{([^}]+)}/gi)
+      const rangeKeyMatches = this.rangeKeyReplacables
+      Array.prototype.push.apply(fieldsToRemove, rangeKeyMatches)
 
-      const partitionKeyMatches = value.match(
-        curlyBracketRegex
-      ) as RegExpMatchArray
-
-      partitionKeyMatches.forEach(match => {
-        const field = match.substring(1, match.length - 1)
-        fieldsToRemove.add(field)
-        value = value.replace(match, data[field])
-      })
-      data[this.definition.rangeKey] = value
+      data[this.definition.rangeKey] = rangeKeyMatches.reduce(
+        keyReplacementReducer,
+        this.rangeKeyValue
+      )
     }
 
-    return omit(data, Array.from(fieldsToRemove))
+    new Set(fieldsToRemove).forEach(field => delete data[field])
+
+    return data
   }
 
   private mapFromDynamoItem = (data: { [key: string]: any }) => {
-    if (
-      this.partitionKeyValue === undefined &&
-      this.rangeKeyValue === undefined
-    ) {
-      return data
-    }
-
     if (this.partitionKeyValue !== undefined) {
-      let value = this.partitionKeyValue
-      const curlyBracketRegex = new RegExp(/{([^}]+)}/gi)
-      const partitionKeyMatches = value.match(
-        curlyBracketRegex
-      ) as RegExpMatchArray
-
-      let toMatch = value
-      let fields: string[] = []
-      partitionKeyMatches.forEach(match => {
-        fields.push(match.substring(1, match.length - 1))
-        toMatch = toMatch.replace(match, '(.*)')
-      })
-
       const hashKey = data[this.definition.hashKey]
+      const partitionKeyMatches = this.partitionKeyReplacables
+      const replacementValues = DynamoTable.getKeyMatches(hashKey)
 
-      let matches = hashKey.match(toMatch)
-      fields.forEach((field, index) => {
-        data[field] = matches[index + 1]
+      if (partitionKeyMatches.length !== replacementValues.length) {
+        throw new Error('shit is fucked')
+      }
+
+      partitionKeyMatches.forEach((match, idx) => {
+        data[match] = replacementValues[idx]
       })
 
       delete data[this.definition.hashKey]
     }
 
     if (this.rangeKeyValue !== undefined && this.definition.rangeKey) {
-      let value = this.rangeKeyValue
-      const curlyBracketRegex = new RegExp(/{([^}]+)}/gi)
-      const partitionKeyMatches = value.match(
-        curlyBracketRegex
-      ) as RegExpMatchArray
+      const rangeKey = data[this.definition.rangeKey]
+      const rangeKeyMatches = this.partitionKeyReplacables
+      const replacementValues = DynamoTable.getKeyMatches(rangeKey)
 
-      let toMatch = value
-      let fields: string[] = []
-      partitionKeyMatches.forEach(match => {
-        fields.push(match.substring(1, match.length - 1))
-        toMatch = toMatch.replace(match, '(.*)')
+      if (rangeKeyMatches.length !== replacementValues.length) {
+        throw new Error('shit is fucked')
+      }
+
+      rangeKeyMatches.forEach((match, idx) => {
+        data[match] = replacementValues[idx]
       })
 
-      const hashKey = data[this.definition.rangeKey]
-
-      let matches = hashKey.match(toMatch)
-      fields.forEach((field, index) => {
-        data[field] = matches[index + 1]
-      })
-
-      delete data[this.definition.rangeKey]
+      delete data[this.definition.hashKey]
     }
 
     return data
