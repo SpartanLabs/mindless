@@ -12,7 +12,6 @@ import {
 } from 'dynogels'
 import { Model, ModelConstructor } from '../model'
 import { ModelFactory } from '../model-factory'
-import { omit } from 'lodash'
 
 export abstract class DynamoTable<TModel extends Model>
   implements ModelFactory<TModel> {
@@ -269,6 +268,7 @@ export abstract class DynamoTable<TModel extends Model>
     const fieldsToRemove: string[] = []
 
     if (this.partitionKeyValue !== undefined) {
+      // merge the arrays
       Array.prototype.push.apply(fieldsToRemove, this.partitionKeyReplacables)
       data[this.definition.hashKey] = this.partitionKeyReplacables.reduce(
         keyReplacementReducer,
@@ -277,6 +277,7 @@ export abstract class DynamoTable<TModel extends Model>
     }
 
     if (this.rangeKeyValue !== undefined && this.definition.rangeKey) {
+      // merge the arrays
       Array.prototype.push.apply(fieldsToRemove, this.rangeKeyReplacables)
       data[this.definition.rangeKey] = this.rangeKeyReplacables.reduce(
         keyReplacementReducer,
@@ -284,6 +285,7 @@ export abstract class DynamoTable<TModel extends Model>
       )
     }
 
+    // create set to make the array unique
     new Set(fieldsToRemove).forEach(field => delete data[field])
 
     return data
@@ -295,7 +297,9 @@ export abstract class DynamoTable<TModel extends Model>
       const replacementValues = DynamoTable.getKeyMatches(hashKey)
 
       if (this.partitionKeyReplacables.length !== replacementValues.length) {
-        throw new Error('shit is fucked')
+        throw new Error(
+          'Partition key format does not match the Models PartitionKeyValue'
+        )
       }
 
       this.partitionKeyReplacables.forEach(
@@ -310,14 +314,16 @@ export abstract class DynamoTable<TModel extends Model>
       const replacementValues = DynamoTable.getKeyMatches(rangeKey)
 
       if (this.rangeKeyReplacables.length !== replacementValues.length) {
-        throw new Error('shit is fucked')
+        throw new Error(
+          'Range key format does not match the Models RangeKeyValue'
+        )
       }
 
       this.rangeKeyReplacables.forEach(
         (match, idx) => (data[match] = replacementValues[idx])
       )
 
-      delete data[this.definition.hashKey]
+      delete data[this.definition.rangeKey]
     }
 
     return data

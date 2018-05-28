@@ -114,7 +114,6 @@
   "dependencies": {
     "dynogels": "^9.0.0",
     "joi": "^13.3.0",
-    "lodash": "^4.17.10",
     "route-parser": "0.0.5"
   }
 }

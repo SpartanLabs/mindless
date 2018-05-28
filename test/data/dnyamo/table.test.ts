@@ -381,8 +381,8 @@ describe('DynamoTable ', () => {
         .setup(c =>
           c.create(
             {
-              test: 'Evan:evan@gmail.com',
-              teste: 'Zeech:zeech@gmail.com'
+              test: '{Evan}:{evan@gmail.com}',
+              teste: '{Zeech}:{zeech@gmail.com}'
             },
             {},
             TypeMoq.It.isAny()
@@ -416,8 +416,8 @@ describe('DynamoTable ', () => {
         Items: [
           {
             attrs: {
-              test: 'Evan:evan@gmail.com',
-              teste: 'Zeech:zeech@gmail.com'
+              test: '{Evan}:{evan@gmail.com}',
+              teste: '{Zeech}:{zeech@gmail.com}'
             }
           }
         ]
@@ -461,8 +461,8 @@ describe('DynamoTable ', () => {
         Items: [
           {
             attrs: {
-              test: 'Evan:evan@gmail.com',
-              teste: 'Zeech:zeech@gmail.com'
+              test: '{Evan}:{evan@gmail.com}',
+              teste: '{Zeech}:{zeech@gmail.com}'
             }
           }
         ]
@@ -496,8 +496,8 @@ describe('DynamoTable ', () => {
 
       const dynamoRaw = {
         attrs: {
-          test: 'Evan:evan@gmail.com',
-          teste: 'Zeech:zeech@gmail.com'
+          test: '{Evan}:{evan@gmail.com}',
+          teste: '{Zeech}:{zeech@gmail.com}'
         }
       }
 
@@ -509,6 +509,38 @@ describe('DynamoTable ', () => {
       const item = await table.get(hashKey)
 
       expect(item).toEqual(new TestModel(testData))
+      dynogelsModelMock.verifyAll()
+    })
+
+    test('throws error if partition key format is changed', () => {
+      let table = new TestTableWithCalculatedKeys()
+      table.dynModel = dynogelsModelMock.object
+
+      const testData = {
+        name: 'Evan',
+        email: 'evan@gmail.com',
+        alternateName: 'Zeech',
+        alternateEmail: 'zeech@gmail.com'
+      }
+
+      const dynamoRaw = {
+        attrs: {
+          test: '{Evan}:{evan@gmail.com}:{extra-value}asdfa',
+          teste: '{Zeech}:{zeech@gmail.com}:{extra-value}agadf'
+        }
+      }
+
+      dynogelsModelMock
+        .setup(c => c.get(hashKey, {}, TypeMoq.It.isAny()))
+        .callback((a, b, c) => c(undefined, dynamoRaw))
+        .verifiable(TypeMoq.Times.once())
+
+      expect(async () => {
+        await table.get(hashKey)
+      }).toThrowError(
+        'Partition key format does not match the Models PartitionKeyValue'
+      )
+
       dynogelsModelMock.verifyAll()
     })
   })
@@ -526,8 +558,8 @@ describe('DynamoTable ', () => {
       })
 
       const dynamoRaw = {
-        test: 'Evan:evan@gmail.com',
-        teste: 'Zeech:zeech@gmail.com'
+        test: '{Evan}:{evan@gmail.com}',
+        teste: '{Zeech}:{zeech@gmail.com}'
       }
 
       dynogelsModelMock
