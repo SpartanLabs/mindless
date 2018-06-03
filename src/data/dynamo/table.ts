@@ -1,3 +1,5 @@
+const { define } = require('dynogels')
+
 import {
   DynogelsItemCallback,
   CreateItemOptions,
@@ -7,8 +9,7 @@ import {
   DocumentCollection,
   UpdateItemOptions,
   DestroyItemOptions,
-  GetItemOptions,
-  define
+  GetItemOptions
 } from 'dynogels'
 import { Model, ModelConstructor } from '../model'
 import { ModelFactory } from '../model-factory'
