@@ -1,4 +1,4 @@
-import {
+import define, {
   DynogelsItemCallback,
   CreateItemOptions,
   Model as DynModel,
@@ -7,8 +7,7 @@ import {
   DocumentCollection,
   UpdateItemOptions,
   DestroyItemOptions,
-  GetItemOptions,
-  define as defineTable
+  GetItemOptions
 } from 'dynogels'
 import { Model, ModelConstructor } from '../model'
 import { ModelFactory } from '../model-factory'
@@ -221,7 +220,7 @@ export abstract class DynamoTable<TModel extends Model>
   }
 
   protected registerTable() {
-    this.dynModel = defineTable(this.tableName, this.definition)
+    this.dynModel = define(this.tableName, this.definition)
   }
 
   protected getAllBase(documentMapper: (x: any[]) => any): Promise<any[]> {
