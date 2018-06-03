@@ -1,4 +1,4 @@
-import define, {
+import {
   DynogelsItemCallback,
   CreateItemOptions,
   Model as DynModel,
@@ -7,7 +7,8 @@ import define, {
   DocumentCollection,
   UpdateItemOptions,
   DestroyItemOptions,
-  GetItemOptions
+  GetItemOptions,
+  define
 } from 'dynogels'
 import { Model, ModelConstructor } from '../model'
 import { ModelFactory } from '../model-factory'
