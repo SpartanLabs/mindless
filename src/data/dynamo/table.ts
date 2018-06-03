@@ -295,7 +295,6 @@ export abstract class DynamoTable<TModel extends Model>
     if (this.partitionKeyValue !== undefined) {
       const hashKey = data[this.definition.hashKey]
       const replacementValues = DynamoTable.getKeyMatches(hashKey)
-
       if (this.partitionKeyReplacables.length !== replacementValues.length) {
         throw new Error(
           'Partition key format does not match the Models PartitionKeyValue'

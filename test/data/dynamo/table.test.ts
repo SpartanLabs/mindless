@@ -512,7 +512,7 @@ describe('DynamoTable ', () => {
       dynogelsModelMock.verifyAll()
     })
 
-    test('throws error if partition key format is changed', () => {
+    test('throws error if partition key format is changed', async () => {
       let table = new TestTableWithCalculatedKeys()
       table.dynModel = dynogelsModelMock.object
 
@@ -525,8 +525,8 @@ describe('DynamoTable ', () => {
 
       const dynamoRaw = {
         attrs: {
-          test: '{Evan}:{evan@gmail.com}:{extra-value}asdfa',
-          teste: '{Zeech}:{zeech@gmail.com}:{extra-value}agadf'
+          test: '{Evan}:{evan@gmail.com}:{extra-value}',
+          teste: '{Zeech}:{zeech@gmail.com}:{extra-value}'
         }
       }
 
@@ -535,14 +535,52 @@ describe('DynamoTable ', () => {
         .callback((a, b, c) => c(undefined, dynamoRaw))
         .verifiable(TypeMoq.Times.once())
 
-      expect(async () => {
+      try {
         await table.get(hashKey)
-      }).toThrowError(
-        'Partition key format does not match the Models PartitionKeyValue'
-      )
+        expect(false).toBeTruthy()
+      } catch (e) {
+        expect(e.message).toMatch(
+          'Partition key format does not match the Models PartitionKeyValue'
+        )
+      }
 
       dynogelsModelMock.verifyAll()
     })
+  })
+
+  test('throws error if range key format is changed', async () => {
+    let table = new TestTableWithCalculatedKeys()
+    table.dynModel = dynogelsModelMock.object
+
+    const testData = {
+      name: 'Evan',
+      email: 'evan@gmail.com',
+      alternateName: 'Zeech',
+      alternateEmail: 'zeech@gmail.com'
+    }
+
+    const dynamoRaw = {
+      attrs: {
+        test: '{Evan}:{evan@gmail.com}',
+        teste: '{Zeech}:{zeech@gmail.com}:{extra-value}'
+      }
+    }
+
+    dynogelsModelMock
+      .setup(c => c.get(hashKey, {}, TypeMoq.It.isAny()))
+      .callback((a, b, c) => c(undefined, dynamoRaw))
+      .verifiable(TypeMoq.Times.once())
+
+    try {
+      await table.get(hashKey)
+      expect(false).toBeTruthy()
+    } catch (e) {
+      expect(e.message).toMatch(
+        'Range key format does not match the Models RangeKeyValue'
+      )
+    }
+
+    dynogelsModelMock.verifyAll()
   })
 
   describe('update() with mappedKeys ', () => {
