@@ -1,7 +1,6 @@
 // Import here Polyfills if needed. Recommended core-js (npm i -D core-js)
 // import "core-js/fn/array.find"
-// ...
-export default class DummyClass {}
+
 export { App, IContainer, IApp } from './app'
 export { Router, Route, MindlessRoute, RouteUrl, IRouter } from './routing'
 export { Context } from './interfaces'
