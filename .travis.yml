@@ -1,28 +1,19 @@
 language: node_js
+branches:
+  only:
+    - master
+    - /^greenkeeper/.*$/
+cache:
+  yarn: true
+  directories:
+    - node_modules
+notifications:
+  email: false
 node_js:
-- '8'
-
-# only send coverage report if this is an actual push to master
-# TODO: may want to make this only send report during release
+  - node
 script:
-  - |
-    if  [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST_BRANCH" = "" ]; then
-      yarn add dev coveralls
-      yarn test-travis
-    else
-      yarn test-cover
-    fi
-
-before_deploy:
-- rm -rf node_modules
-- ./package
-
-deploy:
-  provider: npm
-  email: rosent76@gmail.com
-  api_key:
-    secure: va4/uxGZJeLRmQ0hVuDpxGss8Q5XgF0VtURRFI2p3JAVS8t4P7oH0IZ6fRrMjVEqcmKaUIcwUuPKnFri0JLRT0uwHUxcYVigvbdc3iLhVaZDfBcJMMDIbaDl9hnklkO08L+5Dw+v2pK8urXeQaac5A1yRB4Zv7kXHURQQKlJBCxb2QBVzaGFrKwyMIBdGn0MeTPMjDvBKwMs2KZkfm4yRWHpSYsNCU+zj5pWUeDl1KTKNOxjiMCb9ERJ0Ujx00iEQHsekj+wZv+9uerI9bohCDZ9XZmg0vgxkcM2f+oUbJ26FZ34Nhi6LKRPNcVz143tqTWQNDiyZyzp2wnM5u8FBFR91g2ZRv4xLOUBKl3rdyQ6l9ZoVkqGnSTAO0aurgxjxVlbqEZuqtu0gUn8EGjWZuTRZOqm+3CufzUt0ECEPug4VBQFNRSnVj8KwFSE2HPUkR/ePqQAggC14RB3xb5WB6I+v5+9DbVMwIiCTm3htNNPIsSIqRCe9SpoWgiheF9RNiJWQW/f+JToBVoxGq9rUM3e3zxZ0YQeVwoq4jhkrfdOKaXy9G2lwID7XrrqMyzMfJwCgIQYX3otrGvzsnG5kkdf7OHjKfMOSyHe65debWgOsclaaNBfYE8qjKDIs2GBoD0r44ADvHtKvrGGIpLm339Q3ihK8CoaobXX+1yH2MM=
-  on:
-    tags: true
-    branch: master
-  skip_cleanup: true
+  - npm run test:prod && npm run build
+after_success:
+  - npm run report-coverage
+  - npm run deploy-docs
+  - npm run semantic-release

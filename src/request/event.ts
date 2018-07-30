@@ -9,15 +9,15 @@ export enum HttpMethods {
 }
 
 export interface Event {
-  headers: { [key: string]: string },
-  path: string,
-  pathParameters: { [key: string]: string },
-  requestContext: { [key: string]: any },
-  resource: string,
-  httpMethod: string,
-  queryStringParameters: { [key: string]: any },
-  stageVariables: { [key: string]: any },
-  body: string,
+  headers: { [key: string]: string }
+  path: string
+  pathParameters: { [key: string]: string }
+  requestContext: { [key: string]: any }
+  resource: string
+  httpMethod: string
+  queryStringParameters: { [key: string]: any }
+  stageVariables: { [key: string]: any }
+  body: string
   isOffline?: boolean
 }
 
