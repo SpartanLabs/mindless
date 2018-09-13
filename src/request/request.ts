@@ -56,7 +56,7 @@ export class Request implements IRequest {
     return undefined
   }
 
-  public header(key: string): string {
+  public header(key: string): string | undefined {
     if (typeof this.event.headers[key] !== 'undefined') {
       return this.event.headers[key]
     }
