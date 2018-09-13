@@ -143,7 +143,7 @@ describe('Test request header', () => {
     }).toThrow(/key not found/)
   })
   
-  test('getOrFail retrieve header', () => {
+  test('headerOrFail retrieve header', () => {
     let event = getEvent()
     event.headers['test'] = 'val'
     let request = new Request(event)
