@@ -57,16 +57,12 @@ export class Request implements IRequest {
   }
 
   public header(key: string): string | undefined {
-    if (typeof this.event.headers[key] !== 'undefined') {
-      return this.event.headers[key]
-    }
-    
-    return undefined
+    return this.event.headers[key]
   }
   
   public headerOrFail(key: string): string {
     const value = this.header(key)
-    if (value) {
+    if (value !== undefined) {
       return value
     }
 
