@@ -55,7 +55,7 @@ describe('Test request constructor', () => {
     expect(() => {
       request.getOrFail('abc')
     }).toThrow(/key not found/)
-    expect(request.get('abc')).toBe(undefined)
+    expect(request.get('abc')).toBeUndefined()
   })
 })
 
@@ -129,7 +129,7 @@ describe('Test request get method ', () => {
 
     let retrievedValue = request.get('abc')
 
-    expect(retrievedValue).toBe(undefined)
+    expect(retrievedValue).toBeUndefined()
   })
 })
 
@@ -139,10 +139,27 @@ describe('Test request header', () => {
     let request = new Request(event)
 
     expect(() => {
-      request.header('abc')
+      request.headerOrFail('abc')
     }).toThrow(/key not found/)
   })
+  
+  test('headerOrFail retrieve header', () => {
+    let event = getEvent()
+    event.headers['test'] = 'val'
+    let request = new Request(event)
+    expect(request.headerOrFail('test')).toBe('val')
+  })
 
+  
+  test('undefined header value', () => {
+    let event = getEvent()
+    let request = new Request(event)
+    
+    expect(() => {
+      request.header('abc').toBeUndefined()
+    }     
+  })
+  
   test('retrieve header value', () => {
     let event = getEvent()
     event.headers['test'] = 'val'
@@ -151,6 +168,7 @@ describe('Test request header', () => {
 
     expect(request.header('test')).toBe('val')
   })
+  
 })
 
 describe('Test request add method', () => {

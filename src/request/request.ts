@@ -56,9 +56,14 @@ export class Request implements IRequest {
     return undefined
   }
 
-  public header(key: string): string {
-    if (typeof this.event.headers[key] !== 'undefined') {
-      return this.event.headers[key]
+  public header(key: string): string | undefined {
+    return this.event.headers[key]
+  }
+  
+  public headerOrFail(key: string): string {
+    const value = this.header(key)
+    if (value !== undefined) {
+      return value
     }
 
     throw Error(`Invalid key: '${key}', key not found in headers`)
