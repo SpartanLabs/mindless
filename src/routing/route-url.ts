@@ -1,5 +1,10 @@
 import Route from 'route-parser'
+import { IRouteUrl } from './IRouteUrl'
 
-// don't want to tie user code to route-parser.
-// this allows us to change with out requiring usrs to.
-export class RouteUrl extends Route {}
+// do not want to tie user code to route-parser.
+// this allows us to change with out requiring users to.
+export class RouteUrl extends Route implements IRouteUrl {
+  getRaw(): string {
+    return (this as any).spec
+  }
+}

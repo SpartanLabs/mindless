@@ -1,4 +1,5 @@
 export { RouteUrl } from './route-url'
 export { IRouter } from './IRouter'
+export { IRouteUrl } from './IRouteUrl'
 export { MindlessRoute, Route } from './routes'
 export { Router } from './router'
