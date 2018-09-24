@@ -2,10 +2,10 @@ import { GenericConstructor } from '../interfaces'
 import { Middleware } from '../middleware/middleware'
 import { Controller } from '../controller/controller'
 import { HttpMethods } from '../request'
-import { RouteUrl } from './route-url'
+import { IRouteUrl } from './IRouteUrl'
 
 export interface Route<M extends Middleware, C extends Controller> {
-  url: RouteUrl
+  url: IRouteUrl
   method: HttpMethods
   controller: GenericConstructor<C>
   function: string
