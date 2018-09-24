@@ -2,7 +2,7 @@
 // import "core-js/fn/array.find"
 
 export { App, IContainer, IApp } from './app'
-export { Router, Route, MindlessRoute, RouteUrl, IRouter } from './routing'
+export { Router, Route, MindlessRoute, RouteUrl, IRouteUrl, IRouter } from './routing'
 export { Context } from './interfaces'
 export { Request, Event, HttpMethods } from './request'
 export { Response } from './response'
