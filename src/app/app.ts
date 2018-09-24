@@ -17,24 +17,13 @@ export class App implements IApp {
     // TODO: better response.
     try {
       const data = this.router.getRouteData(request)
-      if (
-        data.route.middleware !== undefined &&
-        data.route.middleware.length > 0
-      ) {
-        await Dispatcher.dispatchMiddleware(
-          this.container,
-          request,
-          data.route.middleware
-        )
+      if (data.route.middleware !== undefined && data.route.middleware.length > 0) {
+        await Dispatcher.dispatchMiddleware(this.container, request, data.route.middleware)
       }
-      return await Dispatcher.dispatchController(
-        this.container,
-        request,
-        data.route,
-        data.params
-      )
+      return await Dispatcher.dispatchController(this.container, request, data.route, data.params)
     } catch (error) {
       // TODO: this kind of thing should be handled by custom Error classes.
+      // TODO: allow user supplied error handler
       console.log('error in MindlessApp.handleRequest: ', error)
       let message = error.message
       if (process.env.NODE_ENV === 'prod') {
