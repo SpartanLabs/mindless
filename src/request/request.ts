@@ -1,3 +1,4 @@
+import { MindlessError } from '../error/mindless.error'
 import { Event, HttpMethods } from './event'
 import { IRequest } from './request-interface'
 
@@ -37,7 +38,7 @@ export class Request implements IRequest {
       return value
     }
 
-    throw Error(
+    throw new MindlessError(
       `Invalid key: '${key}', key not found in pathParameters, queryStringParameters, or Body parameters.`
     )
   }
@@ -59,14 +60,14 @@ export class Request implements IRequest {
   public header(key: string): string | undefined {
     return this.event.headers[key]
   }
-  
+
   public headerOrFail(key: string): string {
     const value = this.header(key)
     if (value !== undefined) {
       return value
     }
 
-    throw Error(`Invalid key: '${key}', key not found in headers`)
+    throw new MindlessError(`Invalid key: '${key}', key not found in headers`)
   }
 
   public add(key: string, val: any, overwrite: boolean = false): void {
@@ -75,7 +76,7 @@ export class Request implements IRequest {
       return
     }
 
-    throw Error(
+    throw new MindlessError(
       `The key '${key}' already exists, pass 'overwrite=true' or use a different key.`
     )
   }

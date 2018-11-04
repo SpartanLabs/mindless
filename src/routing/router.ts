@@ -1,14 +1,12 @@
+import { MindlessError } from '../error/mindless.error'
 import { Route } from './routes'
 import { Middleware } from '../middleware/middleware'
 import { Controller } from '../controller/controller'
 import { Request } from '../request'
 import { IRouter } from './IRouter'
 
-export class Router<
-  M extends Middleware,
-  C extends Controller,
-  R extends Route<M, C>
-> implements IRouter {
+export class Router<M extends Middleware, C extends Controller, R extends Route<M, C>>
+  implements IRouter {
   /**
    * Map that keeps a cache of the names of parameters each controller function requires
    * `key` is of the form <controller-name>-<method-name>
@@ -18,17 +16,13 @@ export class Router<
 
   constructor(protected _routes: R[]) {}
 
-  protected static getRouteMetaData(
-    route: Route<Middleware, Controller>
-  ): { [key: string]: any } {
+  protected static getRouteMetaData(route: Route<Middleware, Controller>): { [key: string]: any } {
     /**
      * controller and middleware are constructors
      * there should be no need for them
      */
     const isUsefulKey = (key: string) =>
-      typeof (route as any)[key] !== 'undefined' &&
-      key !== 'controller' &&
-      key !== 'middleware'
+      typeof (route as any)[key] !== 'undefined' && key !== 'controller' && key !== 'middleware'
 
     return Object.keys(route)
       .filter(isUsefulKey)
@@ -42,7 +36,7 @@ export class Router<
     const funcPieces = func.toString().match(/\(([^)]*)\)/)
 
     if (!funcPieces || funcPieces.length < 2) {
-      throw new Error('Route has invalid function')
+      throw new MindlessError('Route has invalid function')
     }
 
     const args = funcPieces[1]
@@ -93,7 +87,7 @@ export class Router<
       return route
     }
 
-    throw Error('Could not find requested route.')
+    throw new MindlessError('Could not find requested route.')
   }
 
   protected getMethodParameters(route: R) {
@@ -102,9 +96,8 @@ export class Router<
     if (this.methodParameterCache[key] === undefined) {
       const method = route.controller.prototype[route.function]
       if (method === undefined) {
-        throw new Error(
-          `'${route.function}' is not a method on the controller '${route
-            .controller.name}'`
+        throw new MindlessError(
+          `'${route.function}' is not a method on the controller '${route.controller.name}'`
         )
       }
       this.methodParameterCache[key] = Router.getParameters(method)
