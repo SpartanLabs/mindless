@@ -114,8 +114,7 @@ describe('App handle request', () => {
         url: new RouteUrl(''),
         method: HttpMethods.GET,
         function: 'test',
-        controller: controllerConstructorMock.object,
-        middleware: []
+        controller: controllerConstructorMock.object
       },
       params: []
     }
