@@ -57,6 +57,6 @@ export class Dispatcher {
     }
     const args = params.map(getArgToInject)
 
-    return await (subjectController as any)[route.function](...args)
+    return (subjectController as any)[route.function](...args)
   }
 }
