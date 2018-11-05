@@ -6,6 +6,6 @@ export const DefaultErrorHandler: CustomErrorHandler = (e: Error, request: Reque
   console.error(e)
   return new Response(500, {
     message:
-      'an error occurred, using default error handler (see docs to supply your own). Please check your logs'
+      'An error occurred, using default error handler (see docs to supply your own). Please check your logs'
   })
 }
