@@ -1,22 +1,30 @@
-import { Middleware } from '../middleware/middleware'
 import { Controller } from '../controller/controller'
-import { Route } from '../routing'
+import { MindlessError } from '../error/mindless.error'
+import { GenericConstructor } from '../interfaces'
+import { Middleware } from '../middleware/middleware'
 import { Request } from '../request'
 import { Response } from '../response'
+import { Route } from '../routing'
 import { IContainer } from './IContainer'
-import { GenericConstructor } from '../interfaces'
 
 export class Dispatcher {
   public static dispatchMiddleware(
     container: IContainer,
     request: Request,
     middleware: GenericConstructor<Middleware>[]
-  ): Promise<any[]> {
-    const promises: Promise<any>[] = middleware
+  ): Promise<undefined> {
+    const middlewares: Middleware[] = middleware
       .map(constructor => container.resolve(constructor))
-      .map(object => object.handle(request))
+      .reverse()
 
-    return Promise.all(promises)
+    const runNextMiddleware = (): Promise<undefined> => {
+      if (middlewares.length === 0) {
+        return Promise.resolve(undefined)
+      }
+      return middlewares.pop()!.handle(request, runNextMiddleware)
+    }
+
+    return runNextMiddleware()
   }
 
   public static async dispatchController(
@@ -33,29 +41,22 @@ export class Dispatcher {
       try {
         return request.getOrFail(param)
       } catch (e) {
-        const msg =
-          'Unable to inject ' +
-          param +
-          ' into ' +
-          route.controller.name +
-          '.' +
-          route.function
-        throw Error(msg)
+        throw new MindlessError(
+          `Unable to inject ${param} into ${route.controller.name} ${route.function}`
+        )
       }
     }
 
+    let subjectController: Controller
     try {
-      let subjectController: Controller = container.resolve(route.controller)
-      let args = params.map(getArgToInject)
-
-      return await (subjectController as any)[route.function](...args)
+      subjectController = container.resolve(route.controller)
     } catch (e) {
-      let body = {
-        'Error Message': e.message,
-        'Mindless Message':
-          'Unable to resolve requested controller or method make sure your _routes are configured properly'
-      }
-      return new Response(500, body)
+      throw new MindlessError(
+        `Failed to resolve controller from container. Error Message: ${e.message}`
+      )
     }
+    const args = params.map(getArgToInject)
+
+    return (subjectController as any)[route.function](...args)
   }
 }

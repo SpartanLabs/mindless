@@ -1,6 +1,8 @@
 import * as TypeMoq from 'typemoq'
 import { Dispatcher } from '../../src/app'
+import { MindlessError } from '../../src/error/mindless.error'
 import { GenericConstructor } from '../../src/interfaces'
+import { MiddlewareHandle } from '../../src/middleware/middleware-handle'
 
 import {
   Controller,
@@ -9,60 +11,141 @@ import {
   Middleware,
   Request,
   Response,
-  RouteUrl
+  RouteUrl,
+  Event
 } from '../../src/mindless'
+import { ActionMiddlewareMock } from '../mocks/action-middleware.mock'
+import { MiddlewareMock } from '../mocks/middleware.mock'
 
 describe('Dispatch middleware', () => {
-  const requestMock = TypeMoq.Mock.ofType<Request>()
   const containerMock = TypeMoq.Mock.ofType<IContainer>()
-  const controllerConstructorMock = TypeMoq.Mock.ofType<
-    GenericConstructor<Controller>
-  >()
-  const middlewareConstructorMock = TypeMoq.Mock.ofType<
-    GenericConstructor<Middleware>
-  >()
-  const middlewareMock = TypeMoq.Mock.ofType<Middleware>()
+
   beforeEach(() => {
-    requestMock.reset()
     containerMock.reset()
-    controllerConstructorMock.reset()
-    middlewareConstructorMock.reset()
-    middlewareMock.reset()
   })
 
-  test('Middleware is dispatched successfully', async () => {
-    const middleware = [middlewareConstructorMock.object]
+  test('no middleware', async () => {
+    const request = new Request({} as Event)
 
-    containerMock
-      .setup(c => c.resolve(middlewareConstructorMock.object))
-      .returns(() => middlewareMock.object)
-      .verifiable(TypeMoq.Times.once())
+    const middlewareList: GenericConstructor<Middleware>[] = []
 
-    middlewareMock
-      .setup(m => m.handle(TypeMoq.It.isAny()))
-      .returns(() => Promise.resolve('done'))
-      .verifiable(TypeMoq.Times.once())
+    containerMock.setup(c => c.resolve(TypeMoq.It.isAny())).verifiable(TypeMoq.Times.never())
 
-    const values = await Dispatcher.dispatchMiddleware(
+    const response = await Dispatcher.dispatchMiddleware(
       containerMock.object,
-      requestMock.object,
-      middleware
+      request,
+      middlewareList
     )
 
-    expect(values).toHaveLength(1)
-    expect(values[0]).toBe('done')
+    expect(response).toBeUndefined()
 
     containerMock.verifyAll()
-    middlewareMock.verifyAll()
+  })
+
+  test('single middleware', async () => {
+    const request = new Request({} as Event)
+    const middlewareList: GenericConstructor<Middleware>[] = [MiddlewareMock]
+    const middlewareMock = new MiddlewareMock()
+
+    containerMock
+      .setup(c => c.resolve(MiddlewareMock))
+      .returns(() => middlewareMock)
+      .verifiable(TypeMoq.Times.once())
+
+    const response = await Dispatcher.dispatchMiddleware(
+      containerMock.object,
+      request,
+      middlewareList
+    )
+
+    expect(response).toBeUndefined()
+    expect(middlewareMock.numberOfTimesHandleHasBeenCalled).toEqual(1)
+
+    containerMock.verifyAll()
+  })
+
+  test('multiple middleware are called in correct order', async () => {
+    const request = new Request({} as Event)
+    class AnotherMiddlewareMock extends MiddlewareMock {}
+
+    let order = 0
+    const getTag = () => (order++).toString()
+
+    const middlewareList: GenericConstructor<Middleware>[] = [MiddlewareMock, AnotherMiddlewareMock]
+
+    const middlewareMock = new MiddlewareMock(getTag)
+    const anotherMiddlewareMock = new AnotherMiddlewareMock(getTag)
+
+    containerMock
+      .setup(c => c.resolve(MiddlewareMock))
+      .returns(() => middlewareMock)
+      .verifiable(TypeMoq.Times.once())
+
+    containerMock
+      .setup(c => c.resolve(AnotherMiddlewareMock))
+      .returns(() => anotherMiddlewareMock)
+      .verifiable(TypeMoq.Times.once())
+
+    const response = await Dispatcher.dispatchMiddleware(
+      containerMock.object,
+      request,
+      middlewareList
+    )
+
+    expect(response).toBeUndefined()
+    expect(middlewareMock.numberOfTimesHandleHasBeenCalled).toEqual(1)
+    expect(anotherMiddlewareMock.numberOfTimesHandleHasBeenCalled).toEqual(1)
+    expect(middlewareMock.tag).toEqual('0')
+    expect(anotherMiddlewareMock.tag).toEqual('1')
+
+    containerMock.verifyAll()
+  })
+
+  test('multiple middleware share same request', async () => {
+    const request = new Request({} as Event)
+    class AnotherMiddlewareMock extends ActionMiddlewareMock {}
+
+    const middlewareList: GenericConstructor<Middleware>[] = [MiddlewareMock, AnotherMiddlewareMock]
+
+    const key = 'key'
+    const value = 'special value from middleware 1'
+    const middlewareMock = new ActionMiddlewareMock(req => req.add(key, value))
+
+    let valueFromAnotherMiddlewareMock: string | undefined = undefined
+    const anotherMiddlewareMock = new AnotherMiddlewareMock(
+      req => (valueFromAnotherMiddlewareMock = req.get(key))
+    )
+
+    containerMock
+      .setup(c => c.resolve(MiddlewareMock))
+      .returns(() => middlewareMock)
+      .verifiable(TypeMoq.Times.once())
+
+    containerMock
+      .setup(c => c.resolve(AnotherMiddlewareMock))
+      .returns(() => anotherMiddlewareMock)
+      .verifiable(TypeMoq.Times.once())
+
+    const response = await Dispatcher.dispatchMiddleware(
+      containerMock.object,
+      request,
+      middlewareList
+    )
+
+    expect(response).toBeUndefined()
+    expect(middlewareMock.numberOfTimesHandleHasBeenCalled).toEqual(1)
+    expect(anotherMiddlewareMock.numberOfTimesHandleHasBeenCalled).toEqual(1)
+    expect(valueFromAnotherMiddlewareMock).toEqual(value)
+    expect(request.get(key)).toEqual(value)
+
+    containerMock.verifyAll()
   })
 })
 
 describe('Dispatch controller', () => {
   const requestMock = TypeMoq.Mock.ofType<Request>()
   const containerMock = TypeMoq.Mock.ofType<IContainer>()
-  const controllerConstructorMock = TypeMoq.Mock.ofType<
-    GenericConstructor<Controller>
-  >()
+  const controllerConstructorMock = TypeMoq.Mock.ofType<GenericConstructor<Controller>>()
   const controllerMock = TypeMoq.Mock.ofType<Controller>()
 
   beforeEach(() => {
@@ -189,9 +272,7 @@ describe('Dispatch controller', () => {
 describe('Dispatch controller fails', () => {
   const requestMock = TypeMoq.Mock.ofType<Request>()
   const containerMock = TypeMoq.Mock.ofType<IContainer>()
-  const controllerConstructorMock = TypeMoq.Mock.ofType<
-    GenericConstructor<Controller>
-  >()
+  const controllerConstructorMock = TypeMoq.Mock.ofType<GenericConstructor<Controller>>()
   const controllerMock = TypeMoq.Mock.ofType<Controller>()
 
   beforeEach(() => {
@@ -211,22 +292,27 @@ describe('Dispatch controller fails', () => {
 
     const params: string[] = []
 
-    const errorMsg = 'could not resolve controller'
+    const errorMsg = 'original error message'
 
     containerMock
       .setup(c => c.resolve(controllerConstructorMock.object))
       .throws(new Error(errorMsg))
       .verifiable(TypeMoq.Times.once())
 
-    const response: Response = await Dispatcher.dispatchController(
-      containerMock.object,
-      requestMock.object,
-      route,
-      params
-    )
+    try {
+      const response: Response = await Dispatcher.dispatchController(
+        containerMock.object,
+        requestMock.object,
+        route,
+        params
+      )
+    } catch (e) {
+      expect(e).toBeInstanceOf(MindlessError)
+      expect(e.message).toMatch(/Failed to resolve controller from container/)
+      expect(e.message).toMatch(new RegExp(errorMsg))
+    }
 
-    expect(response.statusCode).toBe(500)
-    expect(response.body['Error Message']).toBe(errorMsg)
+    expect.assertions(3)
 
     containerMock.verifyAll()
   })
@@ -251,21 +337,25 @@ describe('Dispatch controller fails', () => {
       .throws(new Error())
       .verifiable(TypeMoq.Times.once())
 
-    const response: Response = await Dispatcher.dispatchController(
-      containerMock.object,
-      requestMock.object,
-      route,
-      params
-    )
+    try {
+      const response: Response = await Dispatcher.dispatchController(
+        containerMock.object,
+        requestMock.object,
+        route,
+        params
+      )
+    } catch (e) {
+      expect(e).toBeInstanceOf(MindlessError)
+      expect(e.message).toMatch(/Unable to inject test/)
+    }
 
-    expect(response.statusCode).toBe(500)
-    expect(response.body['Error Message']).toMatch(/Unable to inject test into/)
+    expect.assertions(2)
 
     containerMock.verifyAll()
     requestMock.verifyAll()
   })
 
-  test('dispatch controller, controller method throws', async () => {
+  test('dispatch controller, controller method error bubbles up', async () => {
     const route = {
       url: new RouteUrl(''),
       method: HttpMethods.GET,
@@ -287,15 +377,18 @@ describe('Dispatch controller fails', () => {
       .throws(new Error(errorMsg))
       .verifiable(TypeMoq.Times.once())
 
-    const response: Response = await Dispatcher.dispatchController(
-      containerMock.object,
-      requestMock.object,
-      route,
-      params
-    )
+    try {
+      const response: Response = await Dispatcher.dispatchController(
+        containerMock.object,
+        requestMock.object,
+        route,
+        params
+      )
+    } catch (e) {
+      expect(e.message).toEqual(errorMsg)
+    }
 
-    expect(response.statusCode).toBe(500)
-    expect(response.body['Error Message']).toBe(errorMsg)
+    expect.assertions(1)
 
     containerMock.verifyAll()
     controllerMock.verifyAll()
