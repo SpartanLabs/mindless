@@ -220,7 +220,7 @@ describe('App handle request', () => {
 
     expect(response).toBeInstanceOf(Response)
     expect(response.statusCode).toBe(500)
-    expect(response.body.message).toMatch(/an error occurred/)
+    expect(response.body.message).toMatch(/An error occurred/)
     expect(response.body.message).toMatch(/using default error handler/)
 
     routerMock.verifyAll()
