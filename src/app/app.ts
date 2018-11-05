@@ -25,6 +25,10 @@ export class App implements IApp {
       await Dispatcher.dispatchMiddleware(this.container, request, data.route.middleware || [])
       return await Dispatcher.dispatchController(this.container, request, data.route, data.params)
     } catch (e) {
+      // Allow middleware and controller to reject with response object
+      if (e instanceof Response) {
+        return e
+      }
       return this.errorHandler(e, request)
     }
   }

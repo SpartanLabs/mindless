@@ -138,6 +138,51 @@ describe('App handle request', () => {
     dispatchControllerMock.verifyAll()
   })
 
+  test('middleware rejects with response', async () => {
+    const app = new App(containerMock.object, routerMock.object)
+
+    Dispatcher.dispatchMiddleware = dispatchMiddlewareMock.object
+    Dispatcher.dispatchController = dispatchControllerMock.object
+
+    const data = {
+      route: {
+        url: new RouteUrl(''),
+        method: HttpMethods.GET,
+        function: 'test',
+        controller: controllerConstructorMock.object,
+        middleware: [middlewareConstructorMock.object]
+      },
+      params: []
+    }
+
+    const errorMsg = 'error message'
+
+    routerMock
+      .setup(r => r.getRouteData(requestMock.object))
+      .returns(() => data)
+      .verifiable(TypeMoq.Times.once())
+
+    dispatchMiddlewareMock
+      .setup(m => m(containerMock.object, requestMock.object, data.route.middleware))
+      .returns(() => Promise.reject(new Response(399, { rejected: errorMsg })))
+      .verifiable(TypeMoq.Times.once())
+
+    dispatchControllerMock
+      .setup(c => c(containerMock.object, requestMock.object, data.route, data.params))
+      .throws(new Error(errorMsg))
+      .verifiable(TypeMoq.Times.never())
+
+    const response = await app.handleRequest(requestMock.object)
+
+    expect(response).toBeInstanceOf(Response)
+    expect(response.statusCode).toBe(399)
+    expect(response.body.rejected).toEqual(errorMsg)
+
+    routerMock.verifyAll()
+    dispatchMiddlewareMock.verifyAll()
+    dispatchControllerMock.verifyAll()
+  })
+
   test('error with default error handler', async () => {
     const app = new App(containerMock.object, routerMock.object)
 
@@ -207,7 +252,7 @@ describe('App handle request', () => {
       params: []
     }
 
-    const errorMsg = 'error message with potentially sensitive info'
+    const errorMsg = 'error message'
 
     requestMock
       .setup(r => r.get(key))
