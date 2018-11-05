@@ -41,9 +41,9 @@ export class Dispatcher {
       try {
         return request.getOrFail(param)
       } catch (e) {
-        const msg =
-          'Unable to inject ' + param + ' into ' + route.controller.name + '.' + route.function
-        throw new MindlessError(msg)
+        throw new MindlessError(
+          `Unable to inject ${param} into ${route.controller.name} ${route.function}`
+        )
       }
     }
 
