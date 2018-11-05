@@ -82,6 +82,17 @@ describe('Test request get method ', () => {
     expect(actualRetrievedValue).toBe('abc')
   })
 
+  test('get null query string parameters', () => {
+    let defaultEvent = getEvent()
+    defaultEvent.queryStringParameters['param'] = null
+
+    let request = new Request(defaultEvent)
+
+    let actualRetrievedValue = request.get('param')
+
+    expect(actualRetrievedValue).toBe(null)
+  })
+
   test('get body parameters', () => {
     let defaultEvent = getEvent()
 
@@ -94,6 +105,18 @@ describe('Test request get method ', () => {
     expect(actualRetrievedValue).toBe('abc')
   })
 
+  test('get null body parameters', () => {
+    let defaultEvent = getEvent()
+
+    defaultEvent.body = JSON.stringify({ param: null })
+
+    let request = new Request(defaultEvent)
+
+    let actualRetrievedValue = request.get('param')
+
+    expect(actualRetrievedValue).toBe(null)
+  })
+
   test('getOrFail retrieve body parameters', () => {
     let defaultEvent = getEvent()
 
@@ -104,6 +127,18 @@ describe('Test request get method ', () => {
     let actualRetrievedValue = request.getOrFail('param')
 
     expect(actualRetrievedValue).toBe('abc')
+  })
+
+  test('getOrFail retrieve null body parameters', () => {
+    let defaultEvent = getEvent()
+
+    defaultEvent.body = JSON.stringify({ param: null })
+
+    let request = new Request(defaultEvent)
+
+    let actualRetrievedValue = request.getOrFail('param')
+
+    expect(actualRetrievedValue).toBe(null)
   })
 
   test('invalid key getOrFail', () => {
@@ -142,7 +177,7 @@ describe('Test request header', () => {
       request.headerOrFail('abc')
     }).toThrow(/key not found/)
   })
-  
+
   test('headerOrFail retrieve header', () => {
     let event = getEvent()
     event.headers['test'] = 'val'
@@ -150,16 +185,20 @@ describe('Test request header', () => {
     expect(request.headerOrFail('test')).toBe('val')
   })
 
-  
+  test('headerOrFail retrieve null header', () => {
+    let event = getEvent()
+    event.headers['test'] = null
+    let request = new Request(event)
+    expect(request.headerOrFail('test')).toBe(null)
+  })
+
   test('undefined header value', () => {
     let event = getEvent()
     let request = new Request(event)
-    
-    expect(() => {
-      request.header('abc').toBeUndefined()
-    }     
+
+    expect(request.header('abc')).toBeUndefined()
   })
-  
+
   test('retrieve header value', () => {
     let event = getEvent()
     event.headers['test'] = 'val'
@@ -168,7 +207,6 @@ describe('Test request header', () => {
 
     expect(request.header('test')).toBe('val')
   })
-  
 })
 
 describe('Test request add method', () => {
