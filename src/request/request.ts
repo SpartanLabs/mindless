@@ -34,7 +34,7 @@ export class Request implements IRequest {
 
   public getOrFail(key: string): any {
     const value = this.get(key)
-    if (value) {
+    if (value !== undefined) {
       return value
     }
 
