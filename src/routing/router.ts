@@ -73,7 +73,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
       if (route.method !== request.method) {
         return false
       }
-      let params = route.url.match(request.path)
+      let params = request.path.match(route.url.getRaw())
       if (params) {
         request.addMultiple(params)
         return true
