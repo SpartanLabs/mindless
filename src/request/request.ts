@@ -1,15 +1,12 @@
 import { MindlessError } from '../error/mindless.error'
 import { RouteMetadata } from '../routing/IRouter'
 import { HttpMethods } from './http-methods'
-import { RequestEvent } from './request-event'
 
 export class Request<TBody = { [key: string]: any }> {
   protected _pathParam: Readonly<{ [key: string]: string }>
   protected _queryParam: Readonly<{ [key: string]: string | string[] }>
   protected _header: Readonly<{ [key: string]: string | string[] }>
-
   protected _context = new Map<string, any>()
-
   protected _routeMetadata: Readonly<RouteMetadata>
   protected _method: Readonly<HttpMethods>
 
@@ -42,11 +39,11 @@ export class Request<TBody = { [key: string]: any }> {
     return this._routeMetadata
   }
 
-  public getPathParameter(key: string) {
+  public getPathParameter(key: string): string | undefined {
     return this._pathParam[key]
   }
 
-  public getPathParameterOrFail(key: string) {
+  public getPathParameterOrFail(key: string): string {
     const value = this.getPathParameter(key)
 
     if (value !== undefined) {
@@ -56,11 +53,11 @@ export class Request<TBody = { [key: string]: any }> {
     throw new MindlessError(`Invalid key: '${key}', key not found in path parameters`)
   }
 
-  public getQueryStringParameter(key: string) {
+  public getQueryStringParameter(key: string): string | string[] | undefined {
     return this._queryParam[key]
   }
 
-  public getQueryStringParameterOrFail(key: string) {
+  public getQueryStringParameterOrFail(key: string): string | string[] {
     const value = this.getQueryStringParameter(key)
 
     if (value !== undefined) {
@@ -70,11 +67,11 @@ export class Request<TBody = { [key: string]: any }> {
     throw new MindlessError(`Invalid key: '${key}', key not found in query string parameters`)
   }
 
-  public getHeader(key: string) {
+  public getHeader(key: string): string | string[] | undefined {
     return this._header[key]
   }
 
-  public getHeaderOrFaile(key: string) {
+  public getHeaderOrFail(key: string): string | string[] {
     const value = this.getHeader(key)
 
     if (value !== undefined) {

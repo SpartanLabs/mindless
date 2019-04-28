@@ -1,10 +1,9 @@
-import { MindlessError } from '../error/mindless.error'
-import { RequestEvent } from '../request'
-import { Route } from './routes'
-import { Middleware } from '../middleware/middleware'
 import { Controller } from '../controller/controller'
-import { Request } from '../request'
+import { MindlessError } from '../error/mindless.error'
+import { Middleware } from '../middleware/middleware'
+import { Request, RequestEvent } from '../request'
 import { IRouter, RouteData, RouteMetadata } from './IRouter'
+import { Route } from './routes'
 
 export class Router<TRoute extends Route<Middleware, Controller>> implements IRouter<TRoute> {
   /**
