@@ -38,13 +38,15 @@ export class Dispatcher {
         return request
       }
 
-      try {
-        return request.getOrFail(param)
-      } catch (e) {
-        throw new MindlessError(
-          `Unable to inject ${param} into ${route.controller.name} ${route.function}`
-        )
+      const value = request.getPathParameter(param) || request.getQueryStringParameter(param)
+
+      if (value !== undefined) {
+        return value
       }
+
+      throw new MindlessError(
+        `Unable to inject ${param} into ${route.controller.name} ${route.function}`
+      )
     }
 
     let subjectController: Controller

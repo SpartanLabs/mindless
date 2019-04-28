@@ -1,61 +1,54 @@
-import { Event, HttpMethods, Request } from '../../src/request'
+import { RequestEvent, HttpMethods, Request } from '../../src/request'
+import { RouteUrl } from '../../src/routing'
+import { RouteMetadata } from '../../src/routing/IRouter'
 
-import * as TypeMoq from 'typemoq'
-
-function getEvent(): Event {
+function getEvent(path: string = '', method: HttpMethods = HttpMethods.GET): RequestEvent {
   return {
+    path,
+    method,
     headers: {},
-    path: '',
-    pathParameters: {},
-    requestContext: {},
-    resource: '',
-    httpMethod: 'GET',
     queryStringParameters: {},
-    stageVariables: {},
-    body: ''
+    body: {}
+  }
+}
+
+function getRouteMetadata(): RouteMetadata {
+  return {
+    function: '',
+    url: new RouteUrl(''),
+    method: HttpMethods.GET
   }
 }
 
 describe('Test request constructor', () => {
-  // construct an event object
-  // no need to mock just a DTO essentially
-  // const eventMock: TypeMoq.IMock<Event> = TypeMoq.Mock.ofType(Event);
-  const localEvent: Event = getEvent() // default event with no data.
-
-  test('empty event', () => {
-    let request = new Request(localEvent)
-    expect(request.path).toBe('')
-    expect(request.method).toBe(HttpMethods.GET)
+  test('method and path are properly exposed', () => {
+    const path = 'some-path'
+    const method = HttpMethods.POST
+    const request = new Request(getEvent(path, method), {}, getRouteMetadata())
+    expect(request.path).toEqual(path)
+    expect(request.method).toEqual(method)
   })
 
-  test('successfully parses json event body', () => {
-    let eventWithBody = localEvent
-    let body = {
+  test('request exposes body object', () => {
+    const event = getEvent()
+    event.body = {
       name: 'zach',
       number: 12345,
       things: ['a', 'b', 'c']
     }
-    eventWithBody.body = JSON.stringify(body)
 
-    let request = new Request(eventWithBody)
+    const request = new Request(event, {}, getRouteMetadata())
 
-    expect(request.get('name')).toBe('zach')
-    expect(request.get('number')).toBe(12345)
-    expect(request.get('things')).toEqual(['a', 'b', 'c'])
+    expect(request.body).toEqual(event.body)
   })
 
-  // needed to not break Request.get()
-  test('defaults pathParameters, queryStringParameters and headers if null', () => {
-    let defaultEvent = localEvent
-    defaultEvent.pathParameters = null
-    defaultEvent.queryStringParameters = null
-    defaultEvent.headers = null
+  test('request exposes routeMetedata', () => {
+    const routeMetadata = getRouteMetadata()
+    routeMetadata.function = 'blah'
 
-    let request = new Request(defaultEvent)
-    expect(() => {
-      request.getOrFail('abc')
-    }).toThrow(/key not found/)
-    expect(request.get('abc')).toBeUndefined()
+    const request = new Request(getEvent(), {}, routeMetadata)
+
+    expect(request.routeMetadata).toEqual(routeMetadata)
   })
 })
 
@@ -142,7 +135,7 @@ describe('Test request header', () => {
       request.headerOrFail('abc')
     }).toThrow(/key not found/)
   })
-  
+
   test('headerOrFail retrieve header', () => {
     let event = getEvent()
     event.headers['test'] = 'val'
@@ -150,16 +143,15 @@ describe('Test request header', () => {
     expect(request.headerOrFail('test')).toBe('val')
   })
 
-  
   test('undefined header value', () => {
     let event = getEvent()
     let request = new Request(event)
-    
+
     expect(() => {
       request.header('abc').toBeUndefined()
-    }     
+    })
   })
-  
+
   test('retrieve header value', () => {
     let event = getEvent()
     event.headers['test'] = 'val'
@@ -168,7 +160,6 @@ describe('Test request header', () => {
 
     expect(request.header('test')).toBe('val')
   })
-  
 })
 
 describe('Test request add method', () => {
