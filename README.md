@@ -3,6 +3,9 @@
 [![Coverage Status](https://coveralls.io/repos/github/SpartanLabs/mindless/badge.svg?branch=master)](https://coveralls.io/github/SpartanLabs/mindless?branch=master)
 
 # mindless
+
+This documentation is out of date.
+
 ### A Library for creating APIs with TypeScript. 
 
 Mindless allows developers to write typical controller-styled apis with models using TypeScript. A great use of the mindless framework is with applications built using the [serverless framework](https://serverless.com/). In a typical serverless application, each route goes to its own function. Using mindless allows the developer to flip the script on this paradigm. Using the lightweight routing mechanism, developers can use routes to point to controllers based on path. Mindless also enables parameter injection and general dependency injection in controllers. Mindless will also have extensions such as permissions and data access that will further empower developers.
