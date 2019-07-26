@@ -14,7 +14,7 @@ export interface RouteData<
 > {
   route: TRoute
   metadata: RouteMetadata<TRoute>
-  pathParameters: { [key: string]: string }
+  pathParameters: ReadonlyMap<string, string>
   methodParameters: string[]
 }
 

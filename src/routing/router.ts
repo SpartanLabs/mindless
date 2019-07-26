@@ -51,12 +51,12 @@ export class Router<TRoute extends Route<Middleware, Controller>> implements IRo
     return { route, metadata, pathParameters, methodParameters }
   }
 
-  protected getRequestedRoute(request: RequestEvent): [TRoute, { [key: string]: string }] {
+  protected getRequestedRoute(request: RequestEvent): [TRoute, ReadonlyMap<string, string>] {
     for (const route of this._routes) {
       if (route.method === request.method) {
         const params = route.url.match(request.path)
         if (params) {
-          return [route, params]
+          return [route, new Map(Object.entries(params))]
         }
       }
     }

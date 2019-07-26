@@ -3,9 +3,9 @@ import { RouteMetadata } from '../routing/IRouter'
 import { HttpMethods } from './http-methods'
 
 export class Request<TBody = { [key: string]: any }> {
-  protected _pathParam: Readonly<{ [key: string]: string }>
-  protected _queryParam: Readonly<{ [key: string]: string | string[] }>
-  protected _header: Readonly<{ [key: string]: string | string[] }>
+  protected _pathParam: ReadonlyMap<string, string>
+  protected _queryParam: ReadonlyMap<string, string | string[]>
+  protected _header: ReadonlyMap<string, string | string[]>
   protected _context = new Map<string, any>()
   protected _routeMetadata: Readonly<RouteMetadata>
   protected _method: Readonly<HttpMethods>
@@ -14,14 +14,14 @@ export class Request<TBody = { [key: string]: any }> {
     protected _path: Readonly<string>,
     protected _body: Readonly<TBody>,
     routeMetadata: RouteMetadata,
-    pathParameters: { [keys: string]: string } = {},
-    queryStringParameters: { [key: string]: string | string[] } = {},
-    headers: { [key: string]: string | string[] } = {}
+    pathParameters: ReadonlyMap<string, string> = new Map(), // { [keys: string]: string } = {},
+    queryStringParameters: ReadonlyMap<string, string | string[]> = new Map(), // { [key: string]: string | string[] } = {},
+    headers: ReadonlyMap<string, string | string[]> = new Map() // { [key: string]: string | string[] } = {}
   ) {
     this._method = routeMetadata.method
-    this._pathParam = Object.freeze(pathParameters)
-    this._queryParam = Object.freeze(queryStringParameters)
-    this._header = Object.freeze(headers)
+    this._pathParam = pathParameters
+    this._queryParam = queryStringParameters
+    this._header = headers
     this._routeMetadata = Object.freeze(routeMetadata)
   }
 
@@ -40,42 +40,36 @@ export class Request<TBody = { [key: string]: any }> {
   }
 
   public getPathParameter(key: string): string | undefined {
-    return this._pathParam[key]
+    return this._pathParam.get(key)
   }
 
   public getPathParameterOrFail(key: string): string {
-    const value = this.getPathParameter(key)
-
-    if (value !== undefined) {
-      return value
+    if (this._pathParam.has(key)) {
+      return this._pathParam.get(key)!
     }
 
     throw new MindlessError(`Invalid key: '${key}', key not found in path parameters`)
   }
 
   public getQueryStringParameter(key: string): string | string[] | undefined {
-    return this._queryParam[key]
+    return this._queryParam.get(key)
   }
 
   public getQueryStringParameterOrFail(key: string): string | string[] {
-    const value = this.getQueryStringParameter(key)
-
-    if (value !== undefined) {
-      return value
+    if (this._queryParam.has(key)) {
+      return this._queryParam.get(key)!
     }
 
     throw new MindlessError(`Invalid key: '${key}', key not found in query string parameters`)
   }
 
   public getHeader(key: string): string | string[] | undefined {
-    return this._header[key]
+    return this._header.get(key)
   }
 
   public getHeaderOrFail(key: string): string | string[] {
-    const value = this.getHeader(key)
-
-    if (value !== undefined) {
-      return value
+    if (this._header.has(key)) {
+      return this._header.get(key)!
     }
 
     throw new MindlessError(`Invalid key: '${key}', key not found in headers`)

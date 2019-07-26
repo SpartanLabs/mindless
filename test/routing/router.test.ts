@@ -101,7 +101,7 @@ describe('Router getRequestRoute returns the correct route and parameters', () =
 
     expect(data.route).toEqual(routes[0])
     expect(data.methodParameters).toHaveLength(0)
-    expect(data.pathParameters).toEqual({})
+    expect(data.pathParameters).toEqual(new Map())
     expect(data.metadata.url).toEqual(expectedRouteMetadata.url)
     expect(data.metadata.method).toEqual(expectedRouteMetadata.method)
     expect(data.metadata.function).toEqual(expectedRouteMetadata.function)
@@ -122,7 +122,7 @@ describe('Router getRequestRoute returns the correct route and parameters', () =
     expect(data.route).toEqual(routes[1])
     expect(data.methodParameters).toHaveLength(1)
     expect(data.methodParameters[0]).toEqual('val')
-    expect(data.pathParameters).toEqual({})
+    expect(data.pathParameters).toEqual(new Map())
     expect(data.metadata.url).toEqual(expectedRouteMetadata.url)
     expect(data.metadata.method).toEqual(expectedRouteMetadata.method)
     expect(data.metadata.function).toEqual(expectedRouteMetadata.function)
@@ -152,10 +152,7 @@ describe('Router add all path parameters to the request', () => {
     eventMock.setup(ev => ev.method).returns(() => HttpMethods.POST)
 
     const data = router.getRouteData(eventMock.object)
-    const expectedParams = {
-      id: '123',
-      name: 'abc'
-    }
+    const expectedParams = new Map([['id', '123'], ['name', 'abc']])
 
     expect(data.route).toEqual(routes[0])
     expect(data.pathParameters).toEqual(expectedParams)

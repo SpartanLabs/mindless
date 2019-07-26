@@ -2,6 +2,7 @@ import { MindlessError } from '../../src/mindless'
 import { HttpMethods, Request } from '../../src/request'
 import { RouteUrl } from '../../src/routing'
 import { RouteMetadata } from '../../src/routing/IRouter'
+import { escapeRegExp } from 'tslint/lib/utils'
 
 function getRouteMetadata(): RouteMetadata {
   return {
@@ -32,6 +33,22 @@ describe('Test request constructor', () => {
     expect(request.body).toEqual(body)
   })
 
+  test('request exposes body object of class instance', () => {
+    class TestBody {
+      constructor(public data: string) {}
+      getGreeting(name: string): string {
+        return `Hello ${name}`
+      }
+    }
+    const body = new TestBody('some data')
+
+    const request = new Request(path, body, getRouteMetadata())
+
+    expect(request.body).toBeInstanceOf(TestBody)
+    expect(request.body.data).toEqual('some data')
+    expect(request.body.getGreeting('bob')).toEqual('Hello bob')
+  })
+
   test('request exposes routeMetedata', () => {
     const routeMetadata = getRouteMetadata()
     routeMetadata.function = 'blah'
@@ -45,7 +62,7 @@ describe('Test request constructor', () => {
 describe('Test request get data ', () => {
   const key = 'param'
   const val = 'abc'
-  const obj = { param: 'abc' }
+  const obj = new Map([['param', 'abc']])
 
   test('set and get context', () => {
     const request = new Request('', {}, getRouteMetadata())
@@ -77,7 +94,7 @@ describe('Test request get data ', () => {
   })
 
   test('get query string parameters', () => {
-    const request = new Request('', {}, getRouteMetadata(), {}, obj)
+    const request = new Request('', {}, getRouteMetadata(), new Map(), obj)
     const actual = request.getQueryStringParameter(key)
     const actualFromOrFail = request.getQueryStringParameterOrFail(key)
 
@@ -86,7 +103,7 @@ describe('Test request get data ', () => {
   })
 
   test('get query string param or fail', () => {
-    const request = new Request('', {}, getRouteMetadata())
+    const request = new Request('', new Map(), getRouteMetadata())
 
     try {
       const actual = request.getQueryStringParameterOrFail(key)
@@ -98,7 +115,7 @@ describe('Test request get data ', () => {
   })
 
   test('get header', () => {
-    const request = new Request('', {}, getRouteMetadata(), {}, {}, obj)
+    const request = new Request('', {}, getRouteMetadata(), new Map(), new Map(), obj)
     const actual = request.getHeader(key)
     const actualFromFail = request.getHeaderOrFail(key)
 
