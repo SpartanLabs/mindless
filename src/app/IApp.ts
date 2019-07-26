@@ -1,6 +1,6 @@
 import { GenericConstructor } from '../interfaces'
-import { RequestEvent } from '../request/request'
 import { Response } from '../response'
+import { RequestEvent } from '../request'
 
 export interface IApp {
   resolve<T>(constructor: GenericConstructor<T>): T
