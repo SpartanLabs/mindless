@@ -1,215 +1,137 @@
-import { Event, HttpMethods, Request } from '../../src/request'
+import { MindlessError } from '../../src/mindless'
+import { HttpMethods, Request } from '../../src/request'
+import { RouteUrl } from '../../src/routing'
+import { RouteMetadata } from '../../src/routing/IRouter'
+import { escapeRegExp } from 'tslint/lib/utils'
 
-import * as TypeMoq from 'typemoq'
-
-function getEvent(): Event {
+function getRouteMetadata(): RouteMetadata {
   return {
-    headers: {},
-    path: '',
-    pathParameters: {},
-    requestContext: {},
-    resource: '',
-    httpMethod: 'GET',
-    queryStringParameters: {},
-    stageVariables: {},
-    body: ''
+    function: '',
+    url: new RouteUrl(''),
+    method: HttpMethods.GET
   }
 }
 
 describe('Test request constructor', () => {
-  // construct an event object
-  // no need to mock just a DTO essentially
-  // const eventMock: TypeMoq.IMock<Event> = TypeMoq.Mock.ofType(Event);
-  const localEvent: Event = getEvent() // default event with no data.
+  const path = 'some-path'
 
-  test('empty event', () => {
-    let request = new Request(localEvent)
-    expect(request.path).toBe('')
-    expect(request.method).toBe(HttpMethods.GET)
+  test('method and path are properly exposed', () => {
+    const request = new Request(path, {}, getRouteMetadata())
+    expect(request.path).toEqual(path)
+    expect(request.method).toEqual(HttpMethods.GET)
   })
 
-  test('successfully parses json event body', () => {
-    let eventWithBody = localEvent
-    let body = {
+  test('request exposes body object', () => {
+    const body = {
       name: 'zach',
       number: 12345,
       things: ['a', 'b', 'c']
     }
-    eventWithBody.body = JSON.stringify(body)
 
-    let request = new Request(eventWithBody)
+    const request = new Request(path, body, getRouteMetadata())
 
-    expect(request.get('name')).toBe('zach')
-    expect(request.get('number')).toBe(12345)
-    expect(request.get('things')).toEqual(['a', 'b', 'c'])
+    expect(request.body).toEqual(body)
   })
 
-  // needed to not break Request.get()
-  test('defaults pathParameters, queryStringParameters and headers if null', () => {
-    let defaultEvent = localEvent
-    defaultEvent.pathParameters = null
-    defaultEvent.queryStringParameters = null
-    defaultEvent.headers = null
+  test('request exposes body object of class instance', () => {
+    class TestBody {
+      constructor(public data: string) {}
+      getGreeting(name: string): string {
+        return `Hello ${name}`
+      }
+    }
+    const body = new TestBody('some data')
 
-    let request = new Request(defaultEvent)
-    expect(() => {
-      request.getOrFail('abc')
-    }).toThrow(/key not found/)
-    expect(request.get('abc')).toBeUndefined()
+    const request = new Request(path, body, getRouteMetadata())
+
+    expect(request.body).toBeInstanceOf(TestBody)
+    expect(request.body.data).toEqual('some data')
+    expect(request.body.getGreeting('bob')).toEqual('Hello bob')
+  })
+
+  test('request exposes routeMetedata', () => {
+    const routeMetadata = getRouteMetadata()
+    routeMetadata.function = 'blah'
+
+    const request = new Request(path, {}, routeMetadata)
+
+    expect(request.routeMetadata).toEqual(routeMetadata)
   })
 })
 
-describe('Test request get method ', () => {
-  const localEvent = getEvent()
-  test('get added params', () => {
-    let defaultEvent = Object.assign({}, localEvent)
-    let request = new Request(defaultEvent)
-    request.add('param', 'abc')
+describe('Test request get data ', () => {
+  const key = 'param'
+  const val = 'abc'
+  const obj = new Map([['param', 'abc']])
 
-    let actualRetrievedValue = request.get('param')
+  test('set and get context', () => {
+    const request = new Request('', {}, getRouteMetadata())
+    request.addContext(key, val)
+    const actual = request.getContext(key)
 
-    expect(actualRetrievedValue).toBe('abc')
+    expect(actual).toBe(val)
+  })
+
+  test('get path parameters', () => {
+    const request = new Request('', {}, getRouteMetadata(), obj)
+    const actual = request.getPathParameter(key)
+    const actualFromOrFail = request.getPathParameterOrFail(key)
+
+    expect(actual).toBe(val)
+    expect(actualFromOrFail).toBe(val)
+  })
+
+  test('get path param or fail', () => {
+    const request = new Request('', {}, getRouteMetadata())
+
+    try {
+      const actual = request.getPathParameterOrFail(key)
+    } catch (e) {
+      expect(e).toBeInstanceOf(MindlessError)
+    }
+
+    expect.assertions(1)
   })
 
   test('get query string parameters', () => {
-    let defaultEvent = getEvent()
-    defaultEvent.queryStringParameters['param'] = 'abc'
+    const request = new Request('', {}, getRouteMetadata(), new Map(), obj)
+    const actual = request.getQueryStringParameter(key)
+    const actualFromOrFail = request.getQueryStringParameterOrFail(key)
 
-    let request = new Request(defaultEvent)
-
-    let actualRetrievedValue = request.get('param')
-
-    expect(actualRetrievedValue).toBe('abc')
+    expect(actual).toBe(val)
+    expect(actualFromOrFail).toBe(val)
   })
 
-  test('get body parameters', () => {
-    let defaultEvent = getEvent()
+  test('get query string param or fail', () => {
+    const request = new Request('', new Map(), getRouteMetadata())
 
-    defaultEvent.body = JSON.stringify({ param: 'abc' })
-
-    let request = new Request(defaultEvent)
-
-    let actualRetrievedValue = request.get('param')
-
-    expect(actualRetrievedValue).toBe('abc')
-  })
-
-  test('getOrFail retrieve body parameters', () => {
-    let defaultEvent = getEvent()
-
-    defaultEvent.body = JSON.stringify({ param: 'abc' })
-
-    let request = new Request(defaultEvent)
-
-    let actualRetrievedValue = request.getOrFail('param')
-
-    expect(actualRetrievedValue).toBe('abc')
-  })
-
-  test('invalid key getOrFail', () => {
-    let defaultEvent = getEvent()
-    defaultEvent.pathParameters['test'] = 'abc'
-    defaultEvent.queryStringParameters['testb'] = 'abc'
-    defaultEvent.body = JSON.stringify({ testc: 'abc' })
-
-    let request = new Request(defaultEvent)
-
-    expect(() => {
-      request.getOrFail('abc')
-    }).toThrow(/key not found/)
-  })
-
-  test('key not found returns undefined', () => {
-    let defaultEvent = getEvent()
-    defaultEvent.pathParameters['test'] = 'abc'
-    defaultEvent.queryStringParameters['testb'] = 'abc'
-    defaultEvent.body = JSON.stringify({ testc: 'abc' })
-
-    let request = new Request(defaultEvent)
-
-    let retrievedValue = request.get('abc')
-
-    expect(retrievedValue).toBeUndefined()
-  })
-})
-
-describe('Test request header', () => {
-  test('invalid key', () => {
-    let event = getEvent()
-    let request = new Request(event)
-
-    expect(() => {
-      request.headerOrFail('abc')
-    }).toThrow(/key not found/)
-  })
-  
-  test('headerOrFail retrieve header', () => {
-    let event = getEvent()
-    event.headers['test'] = 'val'
-    let request = new Request(event)
-    expect(request.headerOrFail('test')).toBe('val')
-  })
-
-  
-  test('undefined header value', () => {
-    let event = getEvent()
-    let request = new Request(event)
-    
-    expect(() => {
-      request.header('abc').toBeUndefined()
-    }     
-  })
-  
-  test('retrieve header value', () => {
-    let event = getEvent()
-    event.headers['test'] = 'val'
-
-    let request = new Request(event)
-
-    expect(request.header('test')).toBe('val')
-  })
-  
-})
-
-describe('Test request add method', () => {
-  let event = getEvent()
-  let request: Request
-
-  beforeEach(() => {
-    // reset request object
-    request = new Request(event)
-  })
-
-  test('Add new key,val pair', () => {
-    request.add('abc', 'val')
-    let retrievedVal = request.get('abc')
-
-    expect(retrievedVal).toBe('val')
-  })
-
-  test('Add new key,val pair with already existing key', () => {
-    request.add('abc', 'val')
-
-    let addKeyAlreadyExists = () => {
-      request.add('abc', 'val2')
+    try {
+      const actual = request.getQueryStringParameterOrFail(key)
+    } catch (e) {
+      expect(e).toBeInstanceOf(MindlessError)
     }
 
-    expect(addKeyAlreadyExists).toThrow(/key 'abc' already exists/)
-    expect(request.get('abc')).toBe('val')
+    expect.assertions(1)
   })
 
-  test('Add new key,val pair with already existing key and overwrite set to true', () => {
-    request.add('abc', 'val')
-    request.add('abc', 'val2', true)
+  test('get header', () => {
+    const request = new Request('', {}, getRouteMetadata(), new Map(), new Map(), obj)
+    const actual = request.getHeader(key)
+    const actualFromFail = request.getHeaderOrFail(key)
 
-    expect(request.get('abc')).toBe('val2')
+    expect(actual).toBe(val)
+    expect(actualFromFail).toBe(val)
   })
 
-  test('Add multiple key,val pair', () => {
-    const map = { abc: 'val', def: 'lav' }
-    request.addMultiple(map)
+  test('get header or fail', () => {
+    const request = new Request('', {}, getRouteMetadata())
 
-    expect(request.get('abc')).toBe('val')
-    expect(request.get('def')).toBe('lav')
+    try {
+      const actual = request.getHeaderOrFail(key)
+    } catch (e) {
+      expect(e).toBeInstanceOf(MindlessError)
+    }
+
+    expect.assertions(1)
   })
 })

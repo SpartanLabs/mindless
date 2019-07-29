@@ -11,6 +11,8 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "declarationDir": "dist/types",
+    "strictPropertyInitialization": true,
+    "strictNullChecks": true,
     "outDir": "dist/lib",
     "typeRoots": [
       "node_modules/@types"

@@ -9,15 +9,14 @@ describe('Response class test', () => {
     expect(response.headers).toEqual({})
   })
 
-  test('aws integration respone', () => {
-    const body = { msg: 'hello world' }
-    const headers = { aHeader: 'i am a header' }
-    const response = new Response(200, body, headers)
+  test('provide values', () => {
+    const code = 837
+    const body = { key: 'val' }
+    const header = { headerKey: 'headerval' }
+    const response = new Response(code, body, header)
 
-    const awsResponse = response.toAWSLambdaIntegrationResponse()
-
-    expect(awsResponse.statusCode).toBe(200)
-    expect(awsResponse.body).toBe(JSON.stringify(body))
-    expect(awsResponse.headers).toBe(headers)
+    expect(response.statusCode).toBe(code)
+    expect(response.body).toEqual(body)
+    expect(response.headers).toEqual(header)
   })
 })

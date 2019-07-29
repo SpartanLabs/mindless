@@ -1,2 +1,3 @@
+export { RequestEvent } from './request-event'
 export { Request } from './request'
-export { Event, HttpMethods } from './event'
+export { HttpMethods } from './http-methods'

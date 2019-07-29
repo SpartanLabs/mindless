@@ -1,12 +1,11 @@
-import { MindlessError } from '../error/mindless.error'
-import { Route } from './routes'
-import { Middleware } from '../middleware/middleware'
 import { Controller } from '../controller/controller'
-import { Request } from '../request'
-import { IRouter } from './IRouter'
+import { MindlessError } from '../error/mindless.error'
+import { Middleware } from '../middleware/middleware'
+import { Request, RequestEvent } from '../request'
+import { IRouter, RouteData, RouteMetadata } from './IRouter'
+import { Route } from './routes'
 
-export class Router<M extends Middleware, C extends Controller, R extends Route<M, C>>
-  implements IRouter {
+export class Router<TRoute extends Route<Middleware, Controller>> implements IRouter<TRoute> {
   /**
    * Map that keeps a cache of the names of parameters each controller function requires
    * `key` is of the form <controller-name>-<method-name>
@@ -14,23 +13,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
    */
   protected methodParameterCache: { [key: string]: string[] } = {}
 
-  constructor(protected _routes: R[]) {}
-
-  protected static getRouteMetaData(route: Route<Middleware, Controller>): { [key: string]: any } {
-    /**
-     * controller and middleware are constructors
-     * there should be no need for them
-     */
-    const isUsefulKey = (key: string) =>
-      typeof (route as any)[key] !== 'undefined' && key !== 'controller' && key !== 'middleware'
-
-    return Object.keys(route)
-      .filter(isUsefulKey)
-      .reduce((metaData: any, key) => {
-        metaData[key] = (route as any)[key]
-        return metaData
-      }, {})
-  }
+  constructor(protected _routes: TRoute[]) {}
 
   private static getParameters(func: Function) {
     const funcPieces = func.toString().match(/\(([^)]*)\)/)
@@ -47,7 +30,7 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
       .filter(arg => arg) // don't add undefined
   }
 
-  public get routes(): R[] {
+  public get routes(): TRoute[] {
     return this._routes
   }
 
@@ -58,39 +41,46 @@ export class Router<M extends Middleware, C extends Controller, R extends Route<
    *  route: the target route object
    *  params: the required parameters for the controller function in the route object
    */
-  public getRouteData(request: Request): { route: R; params: string[] } {
-    const route: R = this.getRequestedRoute(request)
+  public getRouteData(request: RequestEvent): RouteData<TRoute> {
+    const [route, pathParameters] = this.getRequestedRoute(request)
 
-    request.RouteMetaData = Router.getRouteMetaData(route)
+    const metadata = this.getRouteMetaData(route)
 
-    const params = this.getMethodParameters(route)
+    const methodParameters = this.getMethodParameters(route)
 
-    return { route, params }
+    return { route, metadata, pathParameters, methodParameters }
   }
 
-  protected getRequestedRoute(request: Request): R {
-    const isRequestedRoute = (route: Route<M, C>) => {
-      if (route.method !== request.method) {
-        return false
+  protected getRequestedRoute(request: RequestEvent): [TRoute, ReadonlyMap<string, string>] {
+    for (const route of this._routes) {
+      if (route.method === request.method) {
+        const params = route.url.match(request.path)
+        if (params) {
+          return [route, new Map(Object.entries(params))]
+        }
       }
-      let params = route.url.match(request.path)
-      if (params) {
-        request.addMultiple(params)
-        return true
-      }
-      return false
-    }
-
-    let route = this._routes.find(isRequestedRoute)
-
-    if (route) {
-      return route
     }
 
     throw new MindlessError('Could not find requested route.')
   }
 
-  protected getMethodParameters(route: R) {
+  protected getRouteMetaData(route: Route<Middleware, Controller>): RouteMetadata<TRoute> {
+    /**
+     * controller and middleware are constructors
+     * there should be no need for them
+     */
+    const isUsefulKey = (key: string) =>
+      typeof (route as any)[key] !== 'undefined' && key !== 'controller' && key !== 'middleware'
+
+    return Object.keys(route)
+      .filter(isUsefulKey)
+      .reduce((metaData: any, key) => {
+        metaData[key] = (route as any)[key]
+        return metaData
+      }, {})
+  }
+
+  protected getMethodParameters(route: TRoute) {
     const key = `${route.controller.name}-${route.function}`
 
     if (this.methodParameterCache[key] === undefined) {

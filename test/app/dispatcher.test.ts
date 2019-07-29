@@ -1,39 +1,38 @@
 import * as TypeMoq from 'typemoq'
-import { Dispatcher } from '../../src/app'
+import { Dispatcher } from '../../src/app/dispatcher'
 import { MindlessError } from '../../src/error/mindless.error'
 import { GenericConstructor } from '../../src/interfaces'
-import { MiddlewareHandle } from '../../src/middleware/middleware-handle'
 
 import {
   Controller,
+  Event,
   HttpMethods,
   IContainer,
   Middleware,
   Request,
   Response,
-  RouteUrl,
-  Event
+  RouteUrl
 } from '../../src/mindless'
 import { ActionMiddlewareMock } from '../mocks/action-middleware.mock'
 import { MiddlewareMock } from '../mocks/middleware.mock'
 
 describe('Dispatch middleware', () => {
   const containerMock = TypeMoq.Mock.ofType<IContainer>()
+  const requestMock = TypeMoq.Mock.ofType<Request>()
 
   beforeEach(() => {
     containerMock.reset()
+    requestMock.reset()
   })
 
   test('no middleware', async () => {
-    const request = new Request({} as Event)
-
     const middlewareList: GenericConstructor<Middleware>[] = []
 
     containerMock.setup(c => c.resolve(TypeMoq.It.isAny())).verifiable(TypeMoq.Times.never())
 
     const response = await Dispatcher.dispatchMiddleware(
       containerMock.object,
-      request,
+      requestMock.object,
       middlewareList
     )
 
@@ -43,7 +42,6 @@ describe('Dispatch middleware', () => {
   })
 
   test('single middleware', async () => {
-    const request = new Request({} as Event)
     const middlewareList: GenericConstructor<Middleware>[] = [MiddlewareMock]
     const middlewareMock = new MiddlewareMock()
 
@@ -54,7 +52,7 @@ describe('Dispatch middleware', () => {
 
     const response = await Dispatcher.dispatchMiddleware(
       containerMock.object,
-      request,
+      requestMock.object,
       middlewareList
     )
 
@@ -65,30 +63,24 @@ describe('Dispatch middleware', () => {
   })
 
   test('multiple middleware are called in correct order', async () => {
-    const request = new Request({} as Event)
-    class AnotherMiddlewareMock extends MiddlewareMock {}
-
     let order = 0
     const getTag = () => (order++).toString()
 
-    const middlewareList: GenericConstructor<Middleware>[] = [MiddlewareMock, AnotherMiddlewareMock]
+    const middlewareList: GenericConstructor<Middleware>[] = [MiddlewareMock, MiddlewareMock]
 
     const middlewareMock = new MiddlewareMock(getTag)
-    const anotherMiddlewareMock = new AnotherMiddlewareMock(getTag)
+    const anotherMiddlewareMock = new MiddlewareMock(getTag)
+
+    containerMock.setup(c => c.resolve(MiddlewareMock)).returns(() => middlewareMock)
 
     containerMock
       .setup(c => c.resolve(MiddlewareMock))
-      .returns(() => middlewareMock)
-      .verifiable(TypeMoq.Times.once())
-
-    containerMock
-      .setup(c => c.resolve(AnotherMiddlewareMock))
       .returns(() => anotherMiddlewareMock)
-      .verifiable(TypeMoq.Times.once())
+      .verifiable(TypeMoq.Times.exactly(2))
 
     const response = await Dispatcher.dispatchMiddleware(
       containerMock.object,
-      request,
+      requestMock.object,
       middlewareList
     )
 
@@ -102,33 +94,37 @@ describe('Dispatch middleware', () => {
   })
 
   test('multiple middleware share same request', async () => {
-    const request = new Request({} as Event)
-    class AnotherMiddlewareMock extends ActionMiddlewareMock {}
-
-    const middlewareList: GenericConstructor<Middleware>[] = [MiddlewareMock, AnotherMiddlewareMock]
+    const middlewareList: GenericConstructor<Middleware>[] = [
+      ActionMiddlewareMock,
+      ActionMiddlewareMock
+    ]
 
     const key = 'key'
     const value = 'special value from middleware 1'
-    const middlewareMock = new ActionMiddlewareMock(req => req.add(key, value))
+    const middlewareMock = new ActionMiddlewareMock(req => req.addContext(key, value))
 
     let valueFromAnotherMiddlewareMock: string | undefined = undefined
-    const anotherMiddlewareMock = new AnotherMiddlewareMock(
-      req => (valueFromAnotherMiddlewareMock = req.get(key))
+    const anotherMiddlewareMock = new ActionMiddlewareMock(
+      req => (valueFromAnotherMiddlewareMock = req.getContext(key))
     )
 
-    containerMock
-      .setup(c => c.resolve(MiddlewareMock))
-      .returns(() => middlewareMock)
-      .verifiable(TypeMoq.Times.once())
+    containerMock.setup(c => c.resolve(ActionMiddlewareMock)).returns(() => middlewareMock)
 
     containerMock
-      .setup(c => c.resolve(AnotherMiddlewareMock))
+      .setup(c => c.resolve(ActionMiddlewareMock))
       .returns(() => anotherMiddlewareMock)
+      .verifiable(TypeMoq.Times.exactly(2))
+
+    requestMock.setup(r => r.addContext(key, value)).verifiable(TypeMoq.Times.once())
+
+    requestMock
+      .setup(r => r.getContext(key))
+      .returns(() => value)
       .verifiable(TypeMoq.Times.once())
 
     const response = await Dispatcher.dispatchMiddleware(
       containerMock.object,
-      request,
+      requestMock.object,
       middlewareList
     )
 
@@ -136,9 +132,9 @@ describe('Dispatch middleware', () => {
     expect(middlewareMock.numberOfTimesHandleHasBeenCalled).toEqual(1)
     expect(anotherMiddlewareMock.numberOfTimesHandleHasBeenCalled).toEqual(1)
     expect(valueFromAnotherMiddlewareMock).toEqual(value)
-    expect(request.get(key)).toEqual(value)
 
     containerMock.verifyAll()
+    requestMock.verifyAll()
   })
 })
 
@@ -197,7 +193,7 @@ describe('Dispatch controller', () => {
       function: 'test'
     }
 
-    const params = ['test', 'test2']
+    const params = ['test1', 'test2']
 
     containerMock
       .setup(c => c.resolve(controllerConstructorMock.object))
@@ -205,16 +201,16 @@ describe('Dispatch controller', () => {
       .verifiable(TypeMoq.Times.once())
 
     requestMock
-      .setup(r => r.getOrFail('test'))
-      .returns(() => 1)
+      .setup(r => r.getPathParameter('test1'))
+      .returns(() => '1')
       .verifiable(TypeMoq.Times.once())
     requestMock
-      .setup(r => r.getOrFail('test2'))
-      .returns(() => 2)
+      .setup(r => r.getQueryStringParameter('test2'))
+      .returns(() => '2')
       .verifiable(TypeMoq.Times.once())
 
     controllerMock
-      .setup(m => (m as any).test(1, 2))
+      .setup(c => (c as any).test('1', '2'))
       .returns(() => Promise.resolve(new Response()))
       .verifiable(TypeMoq.Times.once())
 
@@ -333,8 +329,13 @@ describe('Dispatch controller fails', () => {
       .verifiable(TypeMoq.Times.once())
 
     requestMock
-      .setup(r => r.getOrFail('test'))
-      .throws(new Error())
+      .setup(r => r.getPathParameter('test'))
+      .returns(() => undefined)
+      .verifiable(TypeMoq.Times.once())
+
+    requestMock
+      .setup(r => r.getQueryStringParameter('test'))
+      .returns(() => undefined)
       .verifiable(TypeMoq.Times.once())
 
     try {

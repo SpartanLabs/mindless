@@ -1,87 +1,85 @@
 import { MindlessError } from '../error/mindless.error'
-import { Event, HttpMethods } from './event'
-import { IRequest } from './request-interface'
+import { RouteMetadata } from '../routing/IRouter'
+import { HttpMethods } from './http-methods'
 
-export class Request implements IRequest {
-  public RouteMetaData: { [key: string]: any } = {}
-  protected _body: { [key: string]: any }
-  protected data: { [key: string]: any } = {}
+export class Request<TBody = { [key: string]: any }> {
+  protected _pathParam: ReadonlyMap<string, string>
+  protected _queryParam: ReadonlyMap<string, string | string[]>
+  protected _header: ReadonlyMap<string, string | string[]>
+  protected _context = new Map<string, any>()
+  protected _routeMetadata: Readonly<RouteMetadata>
+  protected _method: Readonly<HttpMethods>
 
-  constructor(protected event: Event) {
-    if (event.body === '' || event.body == null) {
-      this._body = {}
-    } else {
-      this._body = JSON.parse(event.body)
-    }
-    if (this.event.pathParameters == null) {
-      this.event.pathParameters = {}
-    }
-    if (this.event.queryStringParameters == null) {
-      this.event.queryStringParameters = {}
-    }
-    if (this.event.headers == null) {
-      this.event.headers = {}
-    }
+  constructor(
+    protected _path: Readonly<string>,
+    protected _body: Readonly<TBody>,
+    routeMetadata: RouteMetadata,
+    pathParameters: ReadonlyMap<string, string> = new Map(), // { [keys: string]: string } = {},
+    queryStringParameters: ReadonlyMap<string, string | string[]> = new Map(), // { [key: string]: string | string[] } = {},
+    headers: ReadonlyMap<string, string | string[]> = new Map() // { [key: string]: string | string[] } = {}
+  ) {
+    this._method = routeMetadata.method
+    this._pathParam = pathParameters
+    this._queryParam = queryStringParameters
+    this._header = headers
+    this._routeMetadata = Object.freeze(routeMetadata)
   }
 
-  get path(): string {
-    return this.event.path
+  get path() {
+    return this._path
+  }
+  get method() {
+    return this._method
   }
 
-  get method(): HttpMethods {
-    return (HttpMethods as any)[this.event.httpMethod.toUpperCase()]
+  get body() {
+    return this._body
+  }
+  get routeMetadata() {
+    return this._routeMetadata
   }
 
-  public getOrFail(key: string): any {
-    const value = this.get(key)
-    if (value) {
-      return value
+  public getPathParameter(key: string): string | undefined {
+    return this._pathParam.get(key)
+  }
+
+  public getPathParameterOrFail(key: string): string {
+    if (this._pathParam.has(key)) {
+      return this._pathParam.get(key)!
     }
 
-    throw new MindlessError(
-      `Invalid key: '${key}', key not found in pathParameters, queryStringParameters, or Body parameters.`
-    )
+    throw new MindlessError(`Invalid key: '${key}', key not found in path parameters`)
   }
 
-  public get(key: string): any {
-    if (typeof this.data[key] !== 'undefined') {
-      return this.data[key]
-    }
-    if (typeof this._body[key] !== 'undefined') {
-      return this._body[key]
-    }
-    if (typeof this.event.queryStringParameters[key] !== 'undefined') {
-      return this.event.queryStringParameters[key]
-    }
-
-    return undefined
+  public getQueryStringParameter(key: string): string | string[] | undefined {
+    return this._queryParam.get(key)
   }
 
-  public header(key: string): string | undefined {
-    return this.event.headers[key]
+  public getQueryStringParameterOrFail(key: string): string | string[] {
+    if (this._queryParam.has(key)) {
+      return this._queryParam.get(key)!
+    }
+
+    throw new MindlessError(`Invalid key: '${key}', key not found in query string parameters`)
   }
 
-  public headerOrFail(key: string): string {
-    const value = this.header(key)
-    if (value !== undefined) {
-      return value
+  public getHeader(key: string): string | string[] | undefined {
+    return this._header.get(key)
+  }
+
+  public getHeaderOrFail(key: string): string | string[] {
+    if (this._header.has(key)) {
+      return this._header.get(key)!
     }
 
     throw new MindlessError(`Invalid key: '${key}', key not found in headers`)
   }
 
-  public add(key: string, val: any, overwrite: boolean = false): void {
-    if (overwrite || typeof this.data[key] === 'undefined') {
-      this.data[key] = val
-      return
-    }
-
-    throw new MindlessError(
-      `The key '${key}' already exists, pass 'overwrite=true' or use a different key.`
-    )
+  public addContext<TValue>(key: string, value: TValue) {
+    this._context.set(key, value)
   }
 
-  public addMultiple(data: { [key: string]: any }) {
-    Object.keys(data).forEach(key => this.add(key, data[key]))
+  public getContext<TValue>(key: string): TValue {
+    return this._context.get(key)
   }
 }

@@ -1,9 +1,3 @@
-export interface AWSLambdaIntegrationResponse {
-  statusCode: number
-  body: string
-  headers: { [key: string]: string }
-}
-
 export class Response {
   /**
    *
@@ -16,13 +10,4 @@ export class Response {
     public body: { [key: string]: any } = {},
     public headers: { [key: string]: string } = {}
   ) {}
-
-  // TODO: remove this from the response class
-  public toAWSLambdaIntegrationResponse(): AWSLambdaIntegrationResponse {
-    return {
-      statusCode: this.statusCode,
-      body: JSON.stringify(this.body),
-      headers: this.headers
-    }
-  }
 }
