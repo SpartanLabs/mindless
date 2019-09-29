@@ -2,19 +2,15 @@
 [![npm version](https://badge.fury.io/js/mindless.svg)](https://badge.fury.io/js/mindless)
 [![Coverage Status](https://coveralls.io/repos/github/SpartanLabs/mindless/badge.svg?branch=master)](https://coveralls.io/github/SpartanLabs/mindless?branch=master)
 
-# mindless
+# Mindless
+A fast light weight routing library.
 
-This documentation is out of date.
-
-### A Library for creating APIs with TypeScript. 
-
-Mindless allows developers to write typical controller-styled apis with models using TypeScript. A great use of the mindless framework is with applications built using the [serverless framework](https://serverless.com/). In a typical serverless application, each route goes to its own function. Using mindless allows the developer to flip the script on this paradigm. Using the lightweight routing mechanism, developers can use routes to point to controllers based on path. Mindless also enables parameter injection and general dependency injection in controllers. Mindless will also have extensions such as permissions and data access that will further empower developers.
-
-### [Sample App](https://github.com/SpartanLabs/mindless-aws-lambda-sample-app)
-A sample application is provided in the repository. This sample gives you an example of how to use the mindless framework to create a typescript api using AWS Lambda. 
+### A Library for creating APIs with TypeScript.
+Mindless allows developers to write controller-styled apis using TypeScript. Using the lightweight routing mechanism, developers can use routes to point to controllers based on path. Mindless also enables parameter injection and general dependency injection in controllers.
 
 ## Router
 The mindless router is extremely lightweight and flexible.
+
 #### Defining your routes
 The simplest way to write your routes is to create a `MindlessRoute` array. Here The `AuthController` and `UserController` should both extend the `Controller` class. While the `AuthMiddleware` should extend the `Middleware` class.
 ```ts
@@ -48,7 +44,6 @@ const routes: MindlessRoute[] = [
   }
 ];
 ```
-If you want to extend the base controller and base middleware classes you may use the `Route<M extends Middleware, C extends Controller>` generic
 
 #### Extending Your Routes
 
@@ -57,13 +52,13 @@ The Route object is exteremly flexible, for example say we want to add functiona
 `Request.RouteMetaData.function`
 `etc`
 
-<i>Note: the controller and middleware objects will not be avialble in RouteMetaData. Why? Because if you need them your using this wrong.</i>
+<i>Note: the controller and middleware objects will not be avialble in RouteMetaData.</i>
 ```ts
-interface PermissionRoute<M extends Middleware, C extends Controller> extends Route<M, C> {
+interface ProtectedRoute<M extends Middleware, C extends Controller> extends Route<M, C> {
     permissions?: string[]
 }
 
-const routes: PermissionRoute[] = [
+const routes: ProtectedRoute[] = [
   {
     url: new RouteUrl('/user'),
     method: HttpMethods.GET,
@@ -86,57 +81,54 @@ const routes: PermissionRoute[] = [
 #### Registering Your Routes
 Routes can be registered by creating a new instance of a `Router` object:
 ```ts
-let router = new Router<Middleware, Controller, MindlessRoute>(request, container);
-router.route(routes);
+const router = new Router<Middleware, Controller, MindlessRoute>(routes);
 ```
-Where `request` is a mindless framework `Request` object and `container` is an `inversify` container. 
+
+You will use this router when creating a new app instance.
 
 ## Requests
-Mindless provides a `Request` class that aides with things such as getting request data (path parameters, querystring parameters, body data, and headers) and holding other event information. In order to create a request object, an `Event` object with request data must be created or generated. The current `Event` object is modeled after what AWS Lambda attaches to the first parameter of a function.
+Mindless provides a `Request` class that aides with things such as getting request data (path parameters, querystring parameters, body data, and headers) and holding other event information. In order to create a request object, a `RequestEvent` object with request data must be created or generated.
+If you are using node's built in web server you would simply map the [Incoming Message](https://nodejs.org/api/http.html#http_class_http_incomingmessage) to Mindless's `RequestEvent`. You will then pass the event to the `handleRequest` method on your mindless app instance.
 
-Here is an example of creating a `Request` object in an AWS Lambda handler function:
-```ts
-export async function start(event: Event, context: Context, callback) {
-
-let request = new Request(event);
-...
-```
 
 The `Request` object can then be injected and used in a controller functions:
 ```ts
 public async getUser(request: Request): Promise<Response> {
 
-      let username = request.get('username'); //Retreives from either path parameters, query parameters, and then body.
+      let username = request.body.username;
 
       return Response(200);
 }
 ```
 
-We can also inject queryStringParameters, pathParameters, and bodyParameters directly into our controller methods.
-Say we have `username` passed in as a path parameters, we can then inject the `username` into our controller methods.
+See the [Request API Docs](https://spartanlabs.github.io/mindless/classes/request.html) for more information.
+
+We can also inject queryStringParameters and pathParameters directly into our controller methods.
+Say we have `userId` passed in as a path parameters, we can then inject the `userId` into our controller methods.
 ```ts
-public async getUser(username: string): Promise<Response> {
+public async getUser(userId: string): Promise<Response> {
       return Response(200);
 }
-```
-
-## Dispatching the Controllers
-After configuring the request, routes, and the router for an application the next step is to dispatch the controller. This step is where mindless actually takes the request, finds the right controller, and executes the correct function on that controller. The response returned from the controller function can be returned from this step:
-```ts
-let router = new Router<Middleware, Controller, MindlessRoute>(request, container);
-router.route(routes);
-let res: Response = await router.dispatchController();
 ```
 
 ## Responses
 Mindless provides a `Response` class that can be returned from controller functions. This object contains `statusCode`, `body`, and `headers` properties. Here's an example of creating a new `Response` object from a controller function:
 ```ts
 public async test(): Promise<Response> {
-    return new Response(200, {test: "This is the body"}, {testHeader: "This is a test header"});
+    return new Response(200, {test: "This is the body"}, {'x-test-header': "This is a test header"});
 }
 ```
-In the future, there may be extensions for different integrations for mindless. For now, we will put service integration mappings into the `Response` class. A current example is for AWS Lambda. In your handler function, you can do the following to integrate with AWS Lambda's proxy integration:
+
+## The App
+
 ```ts
-let res: Response = await router.dispatchController();
-callback(null, res.toAWSLambdaIntegrationResponse());
+const routes: MindlessRoute = [....]
+const container = // create a new DI container instance, we recommend InversifyJs
+
+const app = new App(container, routes)
+
+// now we can route our request events
+
+app.handleRequest(event)
 ```
+If using node's internal server you will need to call `app.handleRequest` for every IncomingMessage (after mapping to a request event).
